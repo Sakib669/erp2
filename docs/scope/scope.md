@@ -43,7 +43,7 @@ Spec 0001 · code in `./`
 ### 2. Coding standards and tooling
 Capture conventions, then install linting, formatting, and strict validation from the real scaffolded project.
 **Done when:** root AGENTS.md reflects the real stack, and linting plus type checks pass cleanly.
-- [ ] Capture conventions and tooling choices: /audit
+- [x] Capture conventions and tooling choices: /audit
 - [ ] Install the tooling: /develop tooling
 - [ ] Check it runs clean: /test
 
