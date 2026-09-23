@@ -1,0 +1,186 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  code      String    @unique
+  currency  String    @default("USD")
+  timezone  String    @default("UTC")
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  branches Branch[]
+
+  @@map("companies")
+}
+
+model Branch {
+  id             String    @id @default(cuid())
+  companyId      String
+  name           String
+  code           String    @unique
+  timezone       String    @default("UTC")
+  address        String?
+  phone          String?
+  email          String?
+  isHeadquarters Boolean   @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  userBranches UserBranch[]
+  userRoles    UserRole[]
+  auditLogs    AuditLog[]
+  settings     Setting[]
+
+  @@index([companyId])
+  @@map("branches")
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  name                 String
+  passwordHash         String
+  twoFactorEnabled     Boolean   @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes String[]  @default([])
+  activeBranchId       String?
+  status               String    @default("ACTIVE") // ACTIVE, SUSPENDED, PENDING
+  deletedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  userBranches UserBranch[]
+  userRoles    UserRole[]
+  auditLogs    AuditLog[]
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+model Role {
+  id          String    @id @default(cuid())
+  name        String
+  code        String    @unique
+  description String?
+  isSystem    Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  permissions RolePermission[]
+  userRoles   UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  module      String   // AUTH, ORG, HR, PAYROLL, ACCOUNTS, INVENTORY, WORKFLOW, OPERATIONS
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  branchId  String?  // null indicates organization wide / global access
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, branchId])
+  @@index([userId])
+  @@index([branchId])
+  @@map("user_roles")
+}
+
+model UserBranch {
+  id        String   @id @default(cuid())
+  userId    String
+  branchId  String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, branchId])
+  @@index([userId])
+  @@index([branchId])
+  @@map("user_branches")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  branchId  String?
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGIN_FAILED, BRANCH_ACCESS_DENIED, 2FA_RESET
+  entity    String   // table or domain entity name
+  entityId  String   // affected record ID
+  before    Json?    // previous state snapshot
+  after     Json?    // updated state snapshot
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([branchId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Setting {
+  id          String   @id @default(cuid())
+  branchId    String?  // null indicates global system setting
+  key         String
+  value       String
+  isEncrypted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, key])
+  @@index([key])
+  @@map("settings")
+}
