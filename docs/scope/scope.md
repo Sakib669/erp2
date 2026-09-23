@@ -13,7 +13,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | --- | ------------------------------------------- | ---------- | ----------- |
 | 1   | Stack and architecture                      | Foundation | in-progress |
 | 2   | Coding standards and tooling                | Foundation | done        |
-| 3   | Core multi tenant data model                | Foundation | planned     |
+| 3   | Core multi tenant data model                | Foundation | in-progress |
 | 4   | Design system and UI foundation             | Foundation | planned     |
 | 5   | Identity, Auth and Branch Context           | Slice 1    | planned     |
 | 6   | RBAC and Permission Enforcement             | Slice 2    | planned     |
@@ -51,12 +51,19 @@ Capture conventions, then install linting, formatting, and strict validation fro
 - [x] Install the tooling: /develop tooling
 - [x] Check it runs clean: /test
 
-### 3. Core multi tenant data model · needs a decision
+### 3. Core multi tenant data model · in-progress
 
 Core database schema supporting companies, branches, departments, users, audit logs, and settings with tenant isolation and soft deletes.
 **Done when:** the database schema enforces branch isolation, soft delete timestamps, and audit log tracking for all mutations.
 
-- [ ] Design it (spec): /architect core multi tenant data model
+- [x] Design it (spec): /architect core multi tenant data model
+- [ ] Build it: /develop core multi tenant data model
+  - [ ] Schema update: Department model, Setting version column, and Prisma client generation
+  - [ ] Extended Prisma client: branchId isolation and automatic soft delete filters
+  - [ ] Audit & guard helpers: transactional audit state diffs and branch access 404 security checks
+- [ ] Verify it: /check verify core multi tenant data model
+- [ ] Test it: /test core multi tenant data model
+      Spec 0002 · code in `src/`
 
 ### 4. Design system and UI foundation · needs a decision
 
