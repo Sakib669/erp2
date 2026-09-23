@@ -14,7 +14,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 1   | Stack and architecture                      | Foundation | in-progress |
 | 2   | Coding standards and tooling                | Foundation | done        |
 | 3   | Core multi tenant data model                | Foundation | in-progress |
-| 4   | Design system and UI foundation             | Foundation | planned     |
+| 4   | Design system and UI foundation             | Foundation | in-progress |
 | 5   | Identity, Auth and Branch Context           | Slice 1    | planned     |
 | 6   | RBAC and Permission Enforcement             | Slice 2    | planned     |
 | 7   | HR Core and Employee Lifecycle              | Slice 3    | planned     |
@@ -65,12 +65,21 @@ Core database schema supporting companies, branches, departments, users, audit l
 - [ ] Test it: /test core multi tenant data model
       Spec 0002 · code in `src/`
 
-### 4. Design system and UI foundation · needs a decision
+### 4. Design system and UI foundation · in-progress (spec 0003)
 
 Visual theme, responsive layout shells, navigation bars, and accessible form primitives so the application feels cohesive.
 **Done when:** design guidelines cover typography, palette, spacing, and base components support full keyboard navigation.
 
-- [ ] Design it (spec): /architect design system and UI foundation
+- [x] Design it (spec): /architect design system and UI foundation
+- [x] Build it: /develop design system and UI foundation
+  - [x] OKLCH color theme, next-themes provider, and Geist typography
+  - [x] Core shadcn component primitives (Dialog, DropdownMenu, Table, Select, Tabs, Sheet, Tooltip, Skeleton, Sonner)
+  - [x] Enterprise application shell layout with collapsible sidebar and mobile drawer
+  - [x] Top navigation bar with branch switcher trigger, search, and user profile
+  - [x] Comprehensive design guidelines published to root design.md
+- [ ] Verify it: /check verify design system and UI foundation
+- [ ] Test it: /test design system and UI foundation
+      Spec 0003 · code in `src/`
 
 ## Slice 1: Identity, Auth and Branch Context
 
