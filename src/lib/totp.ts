@@ -1,7 +1,10 @@
 import { generateSecret, generateURI, verifySync } from "otplib";
 import QRCode from "qrcode";
 
-export function generateTwoFactorSecret(userEmail: string, appName = "ERP2 Enterprise") {
+export function generateTwoFactorSecret(
+  userEmail: string,
+  appName = "ERP2 Enterprise"
+) {
   const secret = generateSecret();
   const otpauth = generateURI({
     issuer: appName,
@@ -11,7 +14,9 @@ export function generateTwoFactorSecret(userEmail: string, appName = "ERP2 Enter
   return { secret, otpauth };
 }
 
-export async function generateQrCodeDataUrl(otpauthUrl: string): Promise<string> {
+export async function generateQrCodeDataUrl(
+  otpauthUrl: string
+): Promise<string> {
   return QRCode.toDataURL(otpauthUrl);
 }
 

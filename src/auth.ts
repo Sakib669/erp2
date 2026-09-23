@@ -59,7 +59,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+        const isValidPassword = await bcrypt.compare(
+          password,
+          user.passwordHash
+        );
         if (!isValidPassword) {
           await prisma.$transaction(async (tx) => {
             await recordAudit(
@@ -85,8 +88,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null;
           }
 
-          const isValidToken = verifyTwoFactorToken(twoFactorCode, user.twoFactorSecret);
-          const isBackupCode = user.twoFactorBackupCodes.includes(twoFactorCode);
+          const isValidToken = verifyTwoFactorToken(
+            twoFactorCode,
+            user.twoFactorSecret
+          );
+          const isBackupCode =
+            user.twoFactorBackupCodes.includes(twoFactorCode);
 
           if (!isValidToken && !isBackupCode) {
             await prisma.$transaction(async (tx) => {
@@ -107,7 +114,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const defaultBranch =
           user.userBranches.find((ub) => ub.isDefault) ?? user.userBranches[0];
-        const activeBranchId = user.activeBranchId ?? defaultBranch?.branchId ?? null;
+        const activeBranchId =
+          user.activeBranchId ?? defaultBranch?.branchId ?? null;
 
         await prisma.$transaction(async (tx) => {
           await recordAudit(

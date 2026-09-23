@@ -33,7 +33,8 @@ export async function requireBranchAccess(branchId: string) {
   const user = await requireAuth();
 
   const isSuperAdmin = user.roles.includes("SUPER_ADMIN");
-  const hasBranch = isSuperAdmin || user.branches.some((b) => b.id === branchId);
+  const hasBranch =
+    isSuperAdmin || user.branches.some((b) => b.id === branchId);
 
   if (!hasBranch) {
     await prisma.$transaction(async (tx) => {

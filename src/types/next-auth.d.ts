@@ -6,7 +6,12 @@ declare module "next-auth" {
     activeBranchId?: string | null;
     roles?: string[];
     permissions?: string[];
-    branches?: Array<{ id: string; name: string; code: string; isDefault: boolean }>;
+    branches?: Array<{
+      id: string;
+      name: string;
+      code: string;
+      isDefault: boolean;
+    }>;
   }
 
   interface Session {
@@ -15,7 +20,12 @@ declare module "next-auth" {
       activeBranchId?: string | null;
       roles: string[];
       permissions: string[];
-      branches: Array<{ id: string; name: string; code: string; isDefault: boolean }>;
+      branches: Array<{
+        id: string;
+        name: string;
+        code: string;
+        isDefault: boolean;
+      }>;
     } & DefaultSession["user"];
   }
 }
@@ -26,6 +36,11 @@ declare module "next-auth/jwt" {
     activeBranchId?: string | null;
     roles?: string[];
     permissions?: string[];
-    branches?: Array<{ id: string; name: string; code: string; isDefault: boolean }>;
+    branches?: Array<{
+      id: string;
+      name: string;
+      code: string;
+      isDefault: boolean;
+    }>;
   }
 }

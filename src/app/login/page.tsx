@@ -60,13 +60,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+    <div className="bg-muted/30 flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit mb-2">
+          <div className="bg-primary/10 text-primary mx-auto mb-2 w-fit rounded-full p-3">
             <Building className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl font-bold">Enterprise Sign In</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Enterprise Sign In
+          </CardTitle>
           <CardDescription>
             Enter your employee credentials to access your branch workspace
           </CardDescription>
@@ -74,7 +76,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {errorMessage && (
-              <div className="p-3 text-sm rounded-md bg-destructive/10 text-destructive flex items-center gap-2">
+              <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
                 <ShieldAlert className="h-4 w-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -108,8 +110,11 @@ export default function LoginPage() {
               </>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="twoFactorCode" className="flex items-center gap-2">
-                  <KeyRound className="h-4 w-4 text-primary" />
+                <Label
+                  htmlFor="twoFactorCode"
+                  className="flex items-center gap-2"
+                >
+                  <KeyRound className="text-primary h-4 w-4" />
                   Two Factor Authentication Code
                 </Label>
                 <Input
@@ -123,7 +128,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   maxLength={8}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Open your authenticator app or enter a backup code.
                 </p>
               </div>
@@ -134,14 +139,14 @@ export default function LoginPage() {
               {isLoading
                 ? "Verifying..."
                 : requiresTwoFactor
-                ? "Verify Code"
-                : "Sign In"}
+                  ? "Verify Code"
+                  : "Sign In"}
             </Button>
             {requiresTwoFactor && (
               <Button
                 type="button"
                 variant="ghost"
-                className="w-full text-xs text-muted-foreground"
+                className="text-muted-foreground w-full text-xs"
                 onClick={() => {
                   setRequiresTwoFactor(false);
                   setTwoFactorCode("");

@@ -27,8 +27,12 @@ export async function recordAudit(
       action: params.action,
       entity: params.entity,
       entityId: params.entityId,
-      before: params.before ? (JSON.parse(JSON.stringify(params.before)) as Prisma.InputJsonValue) : Prisma.JsonNull,
-      after: params.after ? (JSON.parse(JSON.stringify(params.after)) as Prisma.InputJsonValue) : Prisma.JsonNull,
+      before: params.before
+        ? (JSON.parse(JSON.stringify(params.before)) as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
+      after: params.after
+        ? (JSON.parse(JSON.stringify(params.after)) as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
       ipAddress: context.ipAddress ?? null,
       userAgent: context.userAgent ?? null,
     },
