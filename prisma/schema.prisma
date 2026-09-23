@@ -41,9 +41,30 @@ model Branch {
   userRoles    UserRole[]
   auditLogs    AuditLog[]
   settings     Setting[]
+  departments  Department[]
 
   @@index([companyId])
   @@map("branches")
+}
+
+model Department {
+  id        String    @id @default(cuid())
+  branchId  String
+  parentId  String?
+  name      String
+  code      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  branch   Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  parent   Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children Department[] @relation("DepartmentHierarchy")
+
+  @@unique([branchId, code])
+  @@index([branchId])
+  @@index([parentId])
+  @@map("departments")
 }
 
 model User {
@@ -174,6 +195,7 @@ model Setting {
   branchId    String?  // null indicates global system setting
   key         String
   value       String
+  version     Int      @default(1)
   isEncrypted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

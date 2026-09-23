@@ -57,10 +57,10 @@ Core database schema supporting companies, branches, departments, users, audit l
 **Done when:** the database schema enforces branch isolation, soft delete timestamps, and audit log tracking for all mutations.
 
 - [x] Design it (spec): /architect core multi tenant data model
-- [ ] Build it: /develop core multi tenant data model
-  - [ ] Schema update: Department model, Setting version column, and Prisma client generation
-  - [ ] Extended Prisma client: branchId isolation and automatic soft delete filters
-  - [ ] Audit & guard helpers: transactional audit state diffs and branch access 404 security checks
+- [x] Build it: /develop core multi tenant data model
+  - [x] Schema update: Department model, Setting version column, and Prisma client generation
+  - [x] Extended Prisma client: branchId isolation and automatic soft delete filters
+  - [x] Audit & guard helpers: transactional audit state diffs and branch access 404 security checks
 - [ ] Verify it: /check verify core multi tenant data model
 - [ ] Test it: /test core multi tenant data model
       Spec 0002 · code in `src/`

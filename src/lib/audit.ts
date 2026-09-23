@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 export interface AuditContext {
   userId?: string | null;
@@ -36,5 +37,25 @@ export async function recordAudit(
       ipAddress: context.ipAddress ?? null,
       userAgent: context.userAgent ?? null,
     },
+  });
+}
+
+export async function withAuditTransaction<T>(
+  context: AuditContext,
+  auditParams: AuditLogParams,
+  operation: (tx: Prisma.TransactionClient) => Promise<T>
+): Promise<T> {
+  return prisma.$transaction(async (tx) => {
+    const result = await operation(tx);
+
+    const afterPayload =
+      auditParams.after !== undefined ? auditParams.after : result;
+
+    await recordAudit(tx, context, {
+      ...auditParams,
+      after: afterPayload,
+    });
+
+    return result;
   });
 }
