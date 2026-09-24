@@ -16,7 +16,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 3   | Core multi tenant data model                | Foundation | done    |
 | 4   | Design system and UI foundation             | Foundation | done    |
 | 5   | Identity, Auth and Branch Context           | Slice 1    | done    |
-| 6   | RBAC and Permission Enforcement             | Slice 2    | planned |
+| 6   | RBAC and Permission Enforcement             | Slice 2    | done    |
 | 7   | HR Core and Employee Lifecycle              | Slice 3    | planned |
 | 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | planned |
 | 9   | Leave Management Engine                     | Slice 5    | planned |
@@ -101,12 +101,22 @@ Authenticate users with credentials and two factor verification, store active br
 
 ## Slice 2: RBAC and Permission Enforcement
 
-### 6. RBAC and Permission Enforcement · needs a decision
+### 6. RBAC and Permission Enforcement · complete (spec 0005)
 
 Manage roles, permissions, user role assignments, branch access boundaries, and account recovery workflows.
 **Done when:** unauthorized branch access returns 404 with an audit entry, and administrators can execute audited two factor reset workflows.
 
-- [ ] Design it (spec): /architect rbac and permission enforcement
+- [x] Design it (spec): /architect rbac and permission enforcement
+- [x] Build it: /develop rbac and permission enforcement
+  - [x] Permission seeds and immutable system roles
+  - [x] RBAC Zod validation schemas
+  - [x] RBAC server actions (Role CRUD, UserRole assignment, Account status and recovery)
+  - [x] Permission check helpers and audit logging
+  - [x] Role management view at /admin/roles
+  - [x] User directory and assignment view at /admin/users
+- [x] Verify it: /check verify rbac and permission enforcement
+- [x] Test it: /test rbac and permission enforcement
+      Spec 0005 · code in `src/`
 
 ## Slice 3: HR Core and Employee Lifecycle
 

@@ -134,12 +134,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           activeBranchId,
-          roles: user.userRoles.map((ur) => ur.role.code),
+          roles: Array.from(
+            new Set(
+              user.userRoles
+                .filter(
+                  (ur) =>
+                    !ur.role.deletedAt &&
+                    (ur.branchId === null || ur.branchId === activeBranchId)
+                )
+                .map((ur) => ur.role.code)
+            )
+          ),
           permissions: Array.from(
             new Set(
-              user.userRoles.flatMap((ur) =>
-                ur.role.permissions.map((rp) => rp.permission.code)
-              )
+              user.userRoles
+                .filter(
+                  (ur) =>
+                    !ur.role.deletedAt &&
+                    (ur.branchId === null || ur.branchId === activeBranchId)
+                )
+                .flatMap((ur) =>
+                  ur.role.permissions.map((rp) => rp.permission.code)
+                )
             )
           ),
           branches: user.userBranches.map((ub) => ({
