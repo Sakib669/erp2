@@ -17,7 +17,9 @@ model Company {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  branches Branch[]
+  branches     Branch[]
+  designations Designation[]
+  employees    Employee[]
 
   @@map("companies")
 }
@@ -42,6 +44,8 @@ model Branch {
   auditLogs    AuditLog[]
   settings     Setting[]
   departments  Department[]
+  shifts       Shift[]
+  employees    Employee[]
 
   @@index([companyId])
   @@map("branches")
@@ -57,9 +61,10 @@ model Department {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  branch   Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  parent   Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
-  children Department[] @relation("DepartmentHierarchy")
+  branch    Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  parent    Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children  Department[] @relation("DepartmentHierarchy")
+  employees Employee[]
 
   @@unique([branchId, code])
   @@index([branchId])
@@ -84,6 +89,7 @@ model User {
   userBranches UserBranch[]
   userRoles    UserRole[]
   auditLogs    AuditLog[]
+  employee     Employee?
 
   @@index([email])
   @@index([status])
@@ -205,4 +211,137 @@ model Setting {
   @@unique([branchId, key])
   @@index([key])
   @@map("settings")
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  PROBATION
+  SUSPENDED
+  TERMINATED
+  RESIGNED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
+enum TransitionType {
+  HIRED
+  PROMOTION
+  TRANSFER
+  DEPARTMENT_CHANGE
+  SALARY_ADJUSTMENT
+  SUSPENSION
+  RESIGNATION
+  TERMINATION
+}
+
+model Designation {
+  id          String    @id @default(cuid())
+  companyId   String
+  title       String
+  code        String
+  description String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees Employee[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("designations")
+}
+
+model Shift {
+  id                 String    @id @default(cuid())
+  branchId           String
+  name               String
+  code               String
+  startTime          String
+  endTime            String
+  gracePeriodMinutes Int       @default(15)
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  employees Employee[]
+
+  @@unique([branchId, code])
+  @@index([branchId])
+  @@map("shifts")
+}
+
+model Employee {
+  id               String         @id @default(cuid())
+  userId           String?        @unique
+  companyId        String
+  branchId         String
+  departmentId     String
+  designationId    String
+  shiftId          String?
+  employeeNumber   String
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  dateOfBirth      DateTime?
+  gender           String?
+  joinDate         DateTime
+  confirmationDate DateTime?
+  status           EmployeeStatus @default(ACTIVE)
+  employmentType   EmploymentType @default(FULL_TIME)
+  baseSalary       Int            // minor currency units (cents)
+  bankName         String?
+  bankAccount      String?
+  emergencyContact String?
+  deletedAt        DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user        User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch      Branch               @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  department  Department           @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  designation Designation          @relation(fields: [designationId], references: [id], onDelete: Restrict)
+  shift       Shift?               @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  transitions EmployeeTransition[]
+
+  @@unique([companyId, employeeNumber])
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([departmentId])
+  @@index([designationId])
+  @@index([status])
+  @@map("employees")
+}
+
+model EmployeeTransition {
+  id                String         @id @default(cuid())
+  employeeId        String
+  transitionType    TransitionType
+  effectiveDate     DateTime
+  fromBranchId      String?
+  toBranchId        String?
+  fromDepartmentId  String?
+  toDepartmentId    String?
+  fromDesignationId String?
+  toDesignationId   String?
+  previousSalary    Int?
+  newSalary         Int?
+  remarks           String?
+  approvedByUserId  String?
+  createdAt         DateTime       @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([effectiveDate])
+  @@map("employee_transitions")
 }
