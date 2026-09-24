@@ -51,10 +51,39 @@ export async function withAuditTransaction<T>(
     const afterPayload =
       auditParams.after !== undefined ? auditParams.after : result;
 
-    await recordAudit(tx, context, {
-      ...auditParams,
-      after: afterPayload,
-    });
+    const resolvedEntityId =
+      auditParams.entityId && auditParams.entityId.length > 0
+        ? auditParams.entityId
+        : result &&
+            typeof result === "object" &&
+            "id" in result &&
+            typeof (result as { id: unknown }).id === "string"
+          ? (result as { id: string }).id
+          : "";
+
+    const resolvedBranchId =
+      context.branchId ??
+      (result &&
+      typeof result === "object" &&
+      "branchId" in result &&
+      typeof (result as { branchId: unknown }).branchId === "string"
+        ? (result as { branchId: string }).branchId
+        : auditParams.entity === "Branch" && resolvedEntityId
+          ? resolvedEntityId
+          : null);
+
+    await recordAudit(
+      tx,
+      {
+        ...context,
+        branchId: resolvedBranchId,
+      },
+      {
+        ...auditParams,
+        entityId: resolvedEntityId,
+        after: afterPayload,
+      }
+    );
 
     return result;
   });

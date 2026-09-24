@@ -28,3 +28,16 @@ export function verifyTwoFactorToken(token: string, secret: string): boolean {
     return false;
   }
 }
+
+export function generateBackupCodes(count = 8): string[] {
+  const codes: string[] = [];
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  for (let i = 0; i < count; i++) {
+    let code = "";
+    for (let j = 0; j < 8; j++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    codes.push(code);
+  }
+  return codes;
+}
