@@ -9,26 +9,26 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 
 ## At a glance
 
-| #   | Feature                                     | Phase      | Status      |
-| --- | ------------------------------------------- | ---------- | ----------- |
-| 1   | Stack and architecture                      | Foundation | in-progress |
-| 2   | Coding standards and tooling                | Foundation | done        |
-| 3   | Core multi tenant data model                | Foundation | in-progress |
-| 4   | Design system and UI foundation             | Foundation | in-progress |
-| 5   | Identity, Auth and Branch Context           | Slice 1    | planned     |
-| 6   | RBAC and Permission Enforcement             | Slice 2    | planned     |
-| 7   | HR Core and Employee Lifecycle              | Slice 3    | planned     |
-| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | planned     |
-| 9   | Leave Management Engine                     | Slice 5    | planned     |
-| 10  | Payroll Calculation Engine                  | Slice 6    | planned     |
-| 11  | Double Entry General Ledger                 | Slice 7    | planned     |
-| 12  | Inventory and Warehouse Management          | Slice 8    | planned     |
-| 13  | Procurement and Supplier Management         | Slice 9    | planned     |
-| 14  | Fixed Asset Management                      | Slice 10   | planned     |
-| 15  | Enterprise Approval Workflows               | Slice 11   | planned     |
-| 16  | Operations and Branch Services              | Slice 12   | planned     |
-| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned     |
-| 18  | Security Hardening and Automated Operations | Slice 14   | planned     |
+| #   | Feature                                     | Phase      | Status  |
+| --- | ------------------------------------------- | ---------- | ------- |
+| 1   | Stack and architecture                      | Foundation | done    |
+| 2   | Coding standards and tooling                | Foundation | done    |
+| 3   | Core multi tenant data model                | Foundation | done    |
+| 4   | Design system and UI foundation             | Foundation | done    |
+| 5   | Identity, Auth and Branch Context           | Slice 1    | done    |
+| 6   | RBAC and Permission Enforcement             | Slice 2    | planned |
+| 7   | HR Core and Employee Lifecycle              | Slice 3    | planned |
+| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | planned |
+| 9   | Leave Management Engine                     | Slice 5    | planned |
+| 10  | Payroll Calculation Engine                  | Slice 6    | planned |
+| 11  | Double Entry General Ledger                 | Slice 7    | planned |
+| 12  | Inventory and Warehouse Management          | Slice 8    | planned |
+| 13  | Procurement and Supplier Management         | Slice 9    | planned |
+| 14  | Fixed Asset Management                      | Slice 10   | planned |
+| 15  | Enterprise Approval Workflows               | Slice 11   | planned |
+| 16  | Operations and Branch Services              | Slice 12   | planned |
+| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned |
+| 18  | Security Hardening and Automated Operations | Slice 14   | planned |
 
 ## Foundations
 
@@ -51,7 +51,7 @@ Capture conventions, then install linting, formatting, and strict validation fro
 - [x] Install the tooling: /develop tooling
 - [x] Check it runs clean: /test
 
-### 3. Core multi tenant data model · in-progress
+### 3. Core multi tenant data model · complete
 
 Core database schema supporting companies, branches, departments, users, audit logs, and settings with tenant isolation and soft deletes.
 **Done when:** the database schema enforces branch isolation, soft delete timestamps, and audit log tracking for all mutations.
@@ -61,11 +61,11 @@ Core database schema supporting companies, branches, departments, users, audit l
   - [x] Schema update: Department model, Setting version column, and Prisma client generation
   - [x] Extended Prisma client: branchId isolation and automatic soft delete filters
   - [x] Audit & guard helpers: transactional audit state diffs and branch access 404 security checks
-- [ ] Verify it: /check verify core multi tenant data model
-- [ ] Test it: /test core multi tenant data model
+- [x] Verify it: /check verify core multi tenant data model
+- [x] Test it: /test core multi tenant data model
       Spec 0002 · code in `src/`
 
-### 4. Design system and UI foundation · in-progress (spec 0003)
+### 4. Design system and UI foundation · complete (spec 0003)
 
 Visual theme, responsive layout shells, navigation bars, and accessible form primitives so the application feels cohesive.
 **Done when:** design guidelines cover typography, palette, spacing, and base components support full keyboard navigation.
@@ -77,18 +77,27 @@ Visual theme, responsive layout shells, navigation bars, and accessible form pri
   - [x] Enterprise application shell layout with collapsible sidebar and mobile drawer
   - [x] Top navigation bar with branch switcher trigger, search, and user profile
   - [x] Comprehensive design guidelines published to root design.md
-- [ ] Verify it: /check verify design system and UI foundation
-- [ ] Test it: /test design system and UI foundation
+- [x] Verify it: /check verify design system and UI foundation
+- [x] Test it: /test design system and UI foundation
       Spec 0003 · code in `src/`
 
 ## Slice 1: Identity, Auth and Branch Context
 
-### 5. Identity, Auth and Branch Context · needs a decision
+### 5. Identity, Auth and Branch Context · complete (spec 0004)
 
 Authenticate users with credentials and two factor verification, store active branch in server validated cookies, and manage branch records.
 **Done when:** a user can sign in with two factor authentication, select an authorized branch, and view branch details.
 
-- [ ] Design it (spec): /architect identity auth and branch context
+- [x] Design it (spec): /architect identity auth and branch context
+- [x] Build it: /develop identity auth and branch context
+  - [x] Organization and branch validation schemas in Zod
+  - [x] Organization server actions (Branch and Department CRUD) with audit logging
+  - [x] Two factor authentication setup, enrollment, and administrative reset actions
+  - [x] Organization management view at /org with branch modals
+  - [x] Department hierarchy management view at /org/departments
+- [x] Verify it: /check verify identity auth and branch context
+- [x] Test it: /test identity auth and branch context
+      Spec 0004 · code in `src/`
 
 ## Slice 2: RBAC and Permission Enforcement
 

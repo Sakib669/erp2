@@ -1,0 +1,369 @@
+"use client";
+
+import * as React from "react";
+import Image from "next/image";
+import {
+  ShieldCheck,
+  ShieldAlert,
+  KeyRound,
+  Copy,
+  Check,
+  QrCode,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  setupTwoFactorAction,
+  confirmTwoFactorAction,
+  disableTwoFactorAction,
+} from "@/actions/auth-actions";
+
+interface TwoFactorSetupProps {
+  initialEnabled?: boolean;
+}
+
+export function TwoFactorSetup({
+  initialEnabled = false,
+}: TwoFactorSetupProps) {
+  const [enabled, setEnabled] = React.useState(initialEnabled);
+  const [enrollModalOpen, setEnrollModalOpen] = React.useState(false);
+  const [disableModalOpen, setDisableModalOpen] = React.useState(false);
+
+  // Setup data from server
+  const [secret, setSecret] = React.useState("");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState("");
+  const [backupCodes, setBackupCodes] = React.useState<string[]>([]);
+  const [verificationCode, setVerificationCode] = React.useState("");
+  const [copiedKey, setCopiedKey] = React.useState(false);
+  const [disablePassword, setDisablePassword] = React.useState("");
+
+  const [isPending, startTransition] = React.useTransition();
+
+  const handleStartEnrollment = () => {
+    startTransition(async () => {
+      const res = await setupTwoFactorAction();
+      if (res.success) {
+        setSecret(res.secret);
+        setQrCodeDataUrl(res.qrCodeDataUrl);
+        setBackupCodes(res.backupCodes);
+        setEnrollModalOpen(true);
+      } else {
+        toast.error("Failed to generate two factor enrollment key");
+      }
+    });
+  };
+
+  const handleConfirmEnrollment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationCode || verificationCode.length < 6) {
+      toast.error("Please enter a valid 6-digit verification code");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await confirmTwoFactorAction({
+        token: verificationCode,
+        secret,
+        backupCodes,
+      });
+
+      if (res.success) {
+        toast.success("Two factor authentication successfully enabled!");
+        setEnabled(true);
+        setEnrollModalOpen(false);
+        setVerificationCode("");
+      } else {
+        toast.error(res.error || "Invalid verification code");
+      }
+    });
+  };
+
+  const handleDisable = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disablePassword) return;
+
+    startTransition(async () => {
+      const res = await disableTwoFactorAction(disablePassword);
+      if (res.success) {
+        toast.success("Two factor authentication disabled");
+        setEnabled(false);
+        setDisableModalOpen(false);
+        setDisablePassword("");
+      } else {
+        toast.error(res.error || "Failed to disable two factor authentication");
+      }
+    });
+  };
+
+  const copySecretKey = () => {
+    navigator.clipboard.writeText(secret);
+    setCopiedKey(true);
+    toast.success("Secret key copied to clipboard");
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const copyBackupCodes = () => {
+    navigator.clipboard.writeText(backupCodes.join("\n"));
+    toast.success("Emergency backup codes copied to clipboard");
+  };
+
+  return (
+    <Card className="border-border bg-card">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-lg">
+              <ShieldCheck className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-bold">
+                Two-Factor Authentication (TOTP)
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Protect your account using time-based one-time password
+                authenticator apps.
+              </CardDescription>
+            </div>
+          </div>
+
+          {enabled ? (
+            <Badge className="bg-success/20 text-success border-success/30 text-xs">
+              Enabled
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground text-xs">
+              Not Configured
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="text-muted-foreground space-y-4 text-xs">
+        <p>
+          When enabled, signing into your account requires entering your
+          password as well as a 6-digit security code generated by your
+          authenticator app (Google Authenticator, Microsoft Authenticator,
+          1Password).
+        </p>
+
+        <div className="border-border flex items-center justify-between border-t pt-2">
+          <div className="flex items-center gap-1.5">
+            <KeyRound className="text-primary size-3.5" />
+            <span>Standard: RFC 6238 TOTP (SHA1, 30s)</span>
+          </div>
+
+          {enabled ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDisableModalOpen(true)}
+              className="text-destructive hover:bg-destructive/10 text-xs"
+            >
+              Disable 2FA
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleStartEnrollment}
+              disabled={isPending}
+              className="gap-1.5 text-xs"
+            >
+              <QrCode className="size-3.5" />
+              {isPending ? "Generating..." : "Enable 2FA"}
+            </Button>
+          )}
+        </div>
+      </CardContent>
+
+      {/* Enrollment Modal Dialog */}
+      <Dialog open={enrollModalOpen} onOpenChange={setEnrollModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleConfirmEnrollment}>
+            <DialogHeader>
+              <DialogTitle>Configure Two-Factor Authentication</DialogTitle>
+              <DialogDescription>
+                Scan the QR code below using your authenticator app, or enter
+                the manual secret key.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-3 text-xs">
+              {/* QR Code image */}
+              <div className="border-border flex flex-col items-center justify-center rounded-lg border bg-white p-3">
+                {qrCodeDataUrl ? (
+                  <Image
+                    src={qrCodeDataUrl}
+                    alt="2FA QR Code"
+                    width={180}
+                    height={180}
+                    unoptimized
+                    className="size-44"
+                  />
+                ) : (
+                  <div className="text-muted-foreground flex size-44 items-center justify-center">
+                    Generating QR code...
+                  </div>
+                )}
+              </div>
+
+              {/* Secret key */}
+              <div className="space-y-1">
+                <Label className="text-muted-foreground text-[11px]">
+                  Manual Entry Key
+                </Label>
+                <div className="border-border bg-muted/50 flex items-center justify-between rounded-md border px-2.5 py-1.5 font-mono text-xs">
+                  <span className="truncate select-all">{secret}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={copySecretKey}
+                    className="size-6 shrink-0"
+                    title="Copy Key"
+                  >
+                    {copiedKey ? (
+                      <Check className="text-success size-3.5" />
+                    ) : (
+                      <Copy className="size-3.5" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Emergency Backup Codes */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-muted-foreground text-[11px]">
+                    Emergency Backup Codes (Save in a secure place)
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={copyBackupCodes}
+                    className="text-primary text-[10px] hover:underline"
+                  >
+                    Copy All
+                  </button>
+                </div>
+                <div className="bg-muted/40 border-border grid grid-cols-2 gap-1.5 rounded-md border p-2 font-mono text-[11px]">
+                  {backupCodes.map((code) => (
+                    <span key={code} className="text-center">
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Verification Code Input */}
+              <div className="border-border space-y-1.5 border-t pt-2">
+                <Label
+                  htmlFor="totp-code"
+                  className="text-foreground text-xs font-semibold"
+                >
+                  Verification Code
+                </Label>
+                <Input
+                  id="totp-code"
+                  type="text"
+                  maxLength={6}
+                  required
+                  placeholder="e.g. 123456"
+                  value={verificationCode}
+                  onChange={(e) =>
+                    setVerificationCode(e.target.value.replace(/\D/g, ""))
+                  }
+                  className="text-center font-mono text-sm tracking-widest"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEnrollModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isPending || verificationCode.length < 6}
+              >
+                {isPending ? "Verifying..." : "Verify and Activate"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disable Modal Dialog */}
+      <Dialog open={disableModalOpen} onOpenChange={setDisableModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleDisable}>
+            <DialogHeader>
+              <DialogTitle className="text-destructive flex items-center gap-2">
+                <ShieldAlert className="size-5" /> Disable Two-Factor
+                Authentication
+              </DialogTitle>
+              <DialogDescription>
+                Disabling two factor authentication lowers your account
+                security. Please confirm your password.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-2 py-4 text-xs">
+              <Label htmlFor="disable-pw">Current Password</Label>
+              <Input
+                id="disable-pw"
+                type="password"
+                required
+                value={disablePassword}
+                onChange={(e) => setDisablePassword(e.target.value)}
+                placeholder="Enter your account password"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDisableModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                size="sm"
+                disabled={isPending || !disablePassword}
+              >
+                {isPending ? "Disabling..." : "Confirm Disable"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
