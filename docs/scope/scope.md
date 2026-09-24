@@ -18,7 +18,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 5   | Identity, Auth and Branch Context           | Slice 1    | done    |
 | 6   | RBAC and Permission Enforcement             | Slice 2    | done    |
 | 7   | HR Core and Employee Lifecycle              | Slice 3    | done    |
-| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | planned |
+| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done    |
 | 9   | Leave Management Engine                     | Slice 5    | planned |
 | 10  | Payroll Calculation Engine                  | Slice 6    | planned |
 | 11  | Double Entry General Ledger                 | Slice 7    | planned |
@@ -142,12 +142,23 @@ Manage employee profiles, designations, department assignments, shifts, and life
 
 ## Slice 4: Biometric Attendance and Ingestion Queue
 
-### 8. Biometric Attendance and Ingestion Queue · needs a decision
+### 8. Biometric Attendance and Ingestion Queue · complete (spec 0007)
 
 Ingest raw biometric punches through an endpoint, deduplicate entries, and process attendance calculation via background queue.
 **Done when:** webhook endpoint accepts offline buffered punches, drops duplicate timestamps, and queues shifts for daily attendance calculation.
 
-- [ ] Design it (spec): /architect biometric attendance and ingestion queue
+- [x] Design it (spec): /architect biometric attendance and ingestion queue
+- [x] Build it: /develop biometric attendance and ingestion queue
+  - [x] Prisma schema additions for RawAttendanceLog and AttendanceRecord
+  - [x] Attendance Zod validation schemas for punch ingestion and manual corrections
+  - [x] Biometric ingestion route handler at /api/attendance/ingest with duplicate skipping
+  - [x] Attendance calculation engine with late arrivals, early exits, and overtime computation
+  - [x] Manual attendance adjustment action with transactional audit logging
+  - [x] Daily attendance dashboard at /attendance with status indicators and adjustment modal
+  - [x] Device punch stream view at /attendance/devices with punch simulator
+- [x] Verify it: /check verify biometric attendance and ingestion queue
+- [x] Test it: /test biometric attendance and ingestion queue
+      Spec 0007 · code in `src/`
 
 ## Slice 5: Leave Management Engine
 
