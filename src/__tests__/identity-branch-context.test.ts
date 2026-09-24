@@ -79,6 +79,8 @@ describe("Feature 5: Identity, Auth & Branch Context Integration", () => {
 
   beforeEach(async () => {
     // Clean up test data in foreign key order
+    await prisma.attendanceRecord.deleteMany();
+    await prisma.rawAttendanceLog.deleteMany();
     await prisma.employeeTransition.deleteMany();
     await prisma.employee.deleteMany();
     await prisma.shift.deleteMany();

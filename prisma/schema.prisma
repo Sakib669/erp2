@@ -43,9 +43,11 @@ model Branch {
   userRoles    UserRole[]
   auditLogs    AuditLog[]
   settings     Setting[]
-  departments  Department[]
-  shifts       Shift[]
-  employees    Employee[]
+  departments        Department[]
+  shifts             Shift[]
+  employees          Employee[]
+  rawAttendanceLogs  RawAttendanceLog[]
+  attendanceRecords  AttendanceRecord[]
 
   @@index([companyId])
   @@map("branches")
@@ -271,6 +273,7 @@ model Shift {
 
   branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
   employees Employee[]
+  attendanceRecords AttendanceRecord[]
 
   @@unique([branchId, code])
   @@index([branchId])
@@ -304,13 +307,14 @@ model Employee {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  user        User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
-  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  branch      Branch               @relation(fields: [branchId], references: [id], onDelete: Restrict)
-  department  Department           @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  designation Designation          @relation(fields: [designationId], references: [id], onDelete: Restrict)
-  shift       Shift?               @relation(fields: [shiftId], references: [id], onDelete: SetNull)
-  transitions EmployeeTransition[]
+  user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch            Branch               @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  department        Department           @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  designation       Designation          @relation(fields: [designationId], references: [id], onDelete: Restrict)
+  shift             Shift?               @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  transitions       EmployeeTransition[]
+  attendanceRecords AttendanceRecord[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -345,3 +349,74 @@ model EmployeeTransition {
   @@index([effectiveDate])
   @@map("employee_transitions")
 }
+
+enum PunchType {
+  CHECK_IN
+  CHECK_OUT
+  BREAK_OUT
+  BREAK_IN
+  AUTO
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  HALF_DAY
+  ABSENT
+  ON_LEAVE
+  HOLIDAY
+}
+
+model RawAttendanceLog {
+  id              String    @id @default(cuid())
+  branchId        String
+  deviceId        String
+  employeeNumber  String
+  punchTime       DateTime
+  punchType       PunchType @default(AUTO)
+  processed       Boolean   @default(false)
+  processingError String?
+  rawPayload      Json?
+  createdAt       DateTime  @default(now())
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, deviceId, employeeNumber, punchTime])
+  @@index([branchId])
+  @@index([employeeNumber])
+  @@index([punchTime])
+  @@index([processed])
+  @@map("raw_attendance_logs")
+}
+
+model AttendanceRecord {
+  id                 String           @id @default(cuid())
+  employeeId         String
+  branchId           String
+  date               DateTime         // UTC midnight representing calendar day
+  shiftId            String?
+  checkIn            DateTime?
+  checkOut           DateTime?
+  totalWorkMinutes   Int              @default(0)
+  overtimeMinutes    Int              @default(0)
+  lateMinutes        Int              @default(0)
+  earlyExitMinutes   Int              @default(0)
+  status             AttendanceStatus @default(ABSENT)
+  isManualCorrection Boolean          @default(false)
+  correctionReason   String?
+  approvedByUserId   String?
+  deletedAt          DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  shift    Shift?   @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, date])
+  @@index([branchId])
+  @@index([date])
+  @@index([status])
+  @@map("attendance_records")
+}
+

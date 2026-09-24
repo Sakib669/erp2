@@ -76,6 +76,8 @@ describe("Feature 7: HR Core and Employee Lifecycle Integration Tests", () => {
 
   beforeEach(async () => {
     // Clean tables in foreign key dependency order
+    await prisma.attendanceRecord.deleteMany();
+    await prisma.rawAttendanceLog.deleteMany();
     await prisma.employeeTransition.deleteMany();
     await prisma.employee.deleteMany();
     await prisma.shift.deleteMany();

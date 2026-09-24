@@ -78,6 +78,8 @@ describe("Feature 6: RBAC and Permission Enforcement Integration", () => {
 
   beforeEach(async () => {
     // Clean up test tables in foreign key order
+    await prisma.attendanceRecord.deleteMany();
+    await prisma.rawAttendanceLog.deleteMany();
     await prisma.employeeTransition.deleteMany();
     await prisma.employee.deleteMany();
     await prisma.shift.deleteMany();

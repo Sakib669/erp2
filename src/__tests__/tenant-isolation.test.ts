@@ -16,6 +16,8 @@ describe("Core Multi Tenant Data Model & Isolation", () => {
 
   beforeEach(async () => {
     // Clean up test data
+    await prisma.attendanceRecord.deleteMany();
+    await prisma.rawAttendanceLog.deleteMany();
     await prisma.employeeTransition.deleteMany();
     await prisma.employee.deleteMany();
     await prisma.shift.deleteMany();
