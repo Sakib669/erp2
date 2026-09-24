@@ -17,7 +17,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 4   | Design system and UI foundation             | Foundation | done    |
 | 5   | Identity, Auth and Branch Context           | Slice 1    | done    |
 | 6   | RBAC and Permission Enforcement             | Slice 2    | done    |
-| 7   | HR Core and Employee Lifecycle              | Slice 3    | planned |
+| 7   | HR Core and Employee Lifecycle              | Slice 3    | done    |
 | 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | planned |
 | 9   | Leave Management Engine                     | Slice 5    | planned |
 | 10  | Payroll Calculation Engine                  | Slice 6    | planned |
@@ -120,12 +120,25 @@ Manage roles, permissions, user role assignments, branch access boundaries, and 
 
 ## Slice 3: HR Core and Employee Lifecycle
 
-### 7. HR Core and Employee Lifecycle · needs a decision
+### 7. HR Core and Employee Lifecycle · complete (spec 0006)
 
 Manage employee profiles, designations, department assignments, shifts, and lifecycle transitions from joining to transfer and resignation.
 **Done when:** administrators can create employees, update employment statuses, and track employment history per branch.
 
-- [ ] Design it (spec): /architect hr core and employee lifecycle
+- [x] Design it (spec): /architect hr core and employee lifecycle
+- [x] Build it: /develop hr core and employee lifecycle
+  - [x] Prisma schema additions for Designation, Shift, Employee, and EmployeeTransition
+  - [x] HR Zod validation schemas for personal data, shifts, and compensation
+  - [x] Server actions for Designation and Shift CRUD with branch validation
+  - [x] Employee onboarding action generating unique staff numbers and initial HIRED transition
+  - [x] Career transition action logging promotions, branch transfers, and salary revisions
+  - [x] Soft delete employee preservation with transactional audit logging
+  - [x] Staff directory view at /hr with branch and department filters
+  - [x] Detailed employee profile and career timeline view at /hr/employees/[id]
+  - [x] Designation and shift operational manager views at /hr/designations and /hr/shifts
+- [x] Verify it: /check verify hr core and employee lifecycle
+- [x] Test it: /test hr core and employee lifecycle
+      Spec 0006 · code in `src/`
 
 ## Slice 4: Biometric Attendance and Ingestion Queue
 
