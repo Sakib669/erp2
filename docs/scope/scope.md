@@ -20,7 +20,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 7   | HR Core and Employee Lifecycle              | Slice 3    | done    |
 | 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done    |
 | 9   | Leave Management Engine                     | Slice 5    | done    |
-| 10  | Payroll Calculation Engine                  | Slice 6    | planned |
+| 10  | Payroll Calculation Engine                  | Slice 6    | done    |
 | 11  | Double Entry General Ledger                 | Slice 7    | planned |
 | 12  | Inventory and Warehouse Management          | Slice 8    | planned |
 | 13  | Procurement and Supplier Management         | Slice 9    | planned |
@@ -183,12 +183,25 @@ Track leave categories, yearly accruals, carry forward rules, leave balances, an
 
 ## Slice 6: Payroll Calculation Engine
 
-### 10. Payroll Calculation Engine · needs a decision
+### 10. Payroll Calculation Engine · complete (spec 0009)
 
 Define salary structures, components, and process monthly payroll runs in background workers with mid month proration and idempotency.
 **Done when:** monthly payroll runs process via background worker, generate payslips, handle joiner proration, and enforce idempotency keys.
 
-- [ ] Design it (spec): /architect payroll calculation engine
+- [x] Design it (spec): /architect payroll calculation engine
+- [x] Build it: /develop payroll calculation engine
+  - [x] Prisma schema additions for SalaryComponent, PayrollRun, Payslip, and PayslipItem
+  - [x] Payroll Zod validation schemas for components, execution, and disbursement
+  - [x] Server actions for Salary Component CRUD with historical payslip protection
+  - [x] Monthly payroll calculation engine with minor unit integer arithmetic
+  - [x] Mid month joiner proration calculating active working day ratios
+  - [x] Automated deduction of daily wage equivalents for unexcused attendance absences
+  - [x] Idempotency key PAYROLL-[branchId]-[year]-[month] duplicate prevention
+  - [x] Salary components manager view at /payroll/components
+  - [x] Payroll overview view at /payroll and itemized run inspection view at /payroll/runs/[id]
+- [x] Verify it: /check verify payroll calculation engine
+- [x] Test it: /test payroll calculation engine
+      Spec 0009 · code in `src/`
 
 ## Slice 7: Double Entry General Ledger
 
