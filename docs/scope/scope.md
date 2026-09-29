@@ -19,7 +19,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 6   | RBAC and Permission Enforcement             | Slice 2    | done    |
 | 7   | HR Core and Employee Lifecycle              | Slice 3    | done    |
 | 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done    |
-| 9   | Leave Management Engine                     | Slice 5    | planned |
+| 9   | Leave Management Engine                     | Slice 5    | done    |
 | 10  | Payroll Calculation Engine                  | Slice 6    | planned |
 | 11  | Double Entry General Ledger                 | Slice 7    | planned |
 | 12  | Inventory and Warehouse Management          | Slice 8    | planned |
@@ -162,12 +162,24 @@ Ingest raw biometric punches through an endpoint, deduplicate entries, and proce
 
 ## Slice 5: Leave Management Engine
 
-### 9. Leave Management Engine · needs a decision
+### 9. Leave Management Engine · complete (spec 0008)
 
 Track leave categories, yearly accruals, carry forward rules, leave balances, and leave request submission.
 **Done when:** employees can apply for leave, balances adjust automatically upon approval, and negative balances are prevented.
 
-- [ ] Design it (spec): /architect leave management engine
+- [x] Design it (spec): /architect leave management engine
+- [x] Build it: /develop leave management engine
+  - [x] Prisma schema additions for LeaveType, LeaveBalance, and LeaveRequest
+  - [x] Leave Zod validation schemas for categories, requests, and approvals
+  - [x] Server actions for Leave Category CRUD with usage protection
+  - [x] Leave request submission locking pending days and preventing balance deficits
+  - [x] Supervisory approval action converting pending to used days with AttendanceRecord sync
+  - [x] Rejection and cancellation flows releasing locked days
+  - [x] Leave management view at /leave with balance metrics and request dialogs
+  - [x] Leave policy configuration view at /leave/types
+- [x] Verify it: /check verify leave management engine
+- [x] Test it: /test leave management engine
+      Spec 0008 · code in `src/`
 
 ## Slice 6: Payroll Calculation Engine
 
