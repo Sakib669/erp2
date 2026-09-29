@@ -20,6 +20,7 @@ model Company {
   branches     Branch[]
   designations Designation[]
   employees    Employee[]
+  leaveTypes   LeaveType[]
 
   @@map("companies")
 }
@@ -48,6 +49,7 @@ model Branch {
   employees          Employee[]
   rawAttendanceLogs  RawAttendanceLog[]
   attendanceRecords  AttendanceRecord[]
+  leaveRequests      LeaveRequest[]
 
   @@index([companyId])
   @@map("branches")
@@ -315,6 +317,8 @@ model Employee {
   shift             Shift?               @relation(fields: [shiftId], references: [id], onDelete: SetNull)
   transitions       EmployeeTransition[]
   attendanceRecords AttendanceRecord[]
+  leaveBalances     LeaveBalance[]
+  leaveRequests     LeaveRequest[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -419,4 +423,88 @@ model AttendanceRecord {
   @@index([status])
   @@map("attendance_records")
 }
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveType {
+  id                  String    @id @default(cuid())
+  companyId           String
+  name                String
+  code                String
+  description         String?
+  defaultDaysPerYear  Int       @default(14)
+  isPaid              Boolean   @default(true)
+  requiresApproval    Boolean   @default(true)
+  carryForwardMaxDays Int       @default(0)
+  deletedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("leave_types")
+}
+
+model LeaveBalance {
+  id                 String    @id @default(cuid())
+  employeeId         String
+  leaveTypeId        String
+  year               Int
+  entitledDays       Int       @default(0)
+  carriedForwardDays Int       @default(0)
+  usedDays           Int       @default(0)
+  pendingDays        Int       @default(0)
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  employee  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, leaveTypeId, year])
+  @@index([employeeId])
+  @@index([leaveTypeId])
+  @@index([year])
+  @@map("leave_balances")
+}
+
+model LeaveRequest {
+  id               String             @id @default(cuid())
+  employeeId       String
+  branchId         String
+  leaveTypeId      String
+  startDate        DateTime           // UTC midnight
+  endDate          DateTime           // UTC midnight
+  daysCount        Int
+  reason           String
+  status           LeaveRequestStatus @default(PENDING)
+  approvedByUserId String?
+  approvalNotes    String?
+  rejectionReason  String?
+  approvedAt       DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  employee  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch    Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId])
+  @@index([branchId])
+  @@index([leaveTypeId])
+  @@index([status])
+  @@index([startDate])
+  @@map("leave_requests")
+}
+
 
