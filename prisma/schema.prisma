@@ -17,10 +17,12 @@ model Company {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  branches     Branch[]
-  designations Designation[]
-  employees    Employee[]
-  leaveTypes   LeaveType[]
+  branches         Branch[]
+  designations     Designation[]
+  employees        Employee[]
+  leaveTypes       LeaveType[]
+  salaryComponents SalaryComponent[]
+  payrollRuns      PayrollRun[]
 
   @@map("companies")
 }
@@ -50,6 +52,8 @@ model Branch {
   rawAttendanceLogs  RawAttendanceLog[]
   attendanceRecords  AttendanceRecord[]
   leaveRequests      LeaveRequest[]
+  payrollRuns        PayrollRun[]
+  payslips           Payslip[]
 
   @@index([companyId])
   @@map("branches")
@@ -319,6 +323,7 @@ model Employee {
   attendanceRecords AttendanceRecord[]
   leaveBalances     LeaveBalance[]
   leaveRequests     LeaveRequest[]
+  payslips          Payslip[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -505,6 +510,134 @@ model LeaveRequest {
   @@index([status])
   @@index([startDate])
   @@map("leave_requests")
+}
+
+enum SalaryComponentType {
+  EARNING
+  DEDUCTION
+}
+
+enum ComponentCalculationType {
+  FIXED
+  PERCENTAGE_OF_BASIC
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PayslipStatus {
+  DRAFT
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+model SalaryComponent {
+  id              String                   @id @default(cuid())
+  companyId       String
+  name            String
+  code            String
+  type            SalaryComponentType
+  calculationType ComponentCalculationType @default(FIXED)
+  defaultAmount   Int                      @default(0) // cents or basis points
+  isTaxable       Boolean                  @default(true)
+  deletedAt       DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payslipItems PayslipItem[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("salary_components")
+}
+
+model PayrollRun {
+  id                String           @id @default(cuid())
+  companyId         String
+  branchId          String
+  year              Int
+  month             Int
+  status            PayrollRunStatus @default(DRAFT)
+  totalGross        Int              @default(0) // cents
+  totalDeductions   Int              @default(0) // cents
+  totalNet          Int              @default(0) // cents
+  employeeCount     Int              @default(0)
+  idempotencyKey    String           @unique
+  notes             String?
+  processedByUserId String?
+  processedAt       DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch   Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  payslips Payslip[]
+
+  @@unique([companyId, branchId, year, month])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([year, month])
+  @@index([status])
+  @@map("payroll_runs")
+}
+
+model Payslip {
+  id              String        @id @default(cuid())
+  payrollRunId    String
+  employeeId      String
+  branchId        String
+  year            Int
+  month           Int
+  baseSalary      Int           // monthly base in cents
+  grossEarnings   Int           // cents
+  totalDeductions Int           // cents
+  netSalary       Int           // cents
+  workingDays     Int           @default(30)
+  paidDays        Int           @default(30)
+  unpaidLeaveDays Int           @default(0)
+  prorationRatio  Float         @default(1.0)
+  status          PayslipStatus @default(DRAFT)
+  paymentDate     DateTime?
+  paymentMethod   String?       // BANK_TRANSFER, CASH, CHEQUE
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  payrollRun PayrollRun    @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employee   Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch     Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  items      PayslipItem[]
+
+  @@unique([payrollRunId, employeeId])
+  @@index([employeeId])
+  @@index([branchId])
+  @@index([status])
+  @@map("payslips")
+}
+
+model PayslipItem {
+  id                String              @id @default(cuid())
+  payslipId         String
+  salaryComponentId String?
+  name              String
+  code              String
+  type              SalaryComponentType
+  amount            Int                 // cents
+  createdAt         DateTime            @default(now())
+
+  payslip         Payslip          @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  salaryComponent SalaryComponent? @relation(fields: [salaryComponentId], references: [id], onDelete: SetNull)
+
+  @@index([payslipId])
+  @@index([salaryComponentId])
+  @@map("payslip_items")
 }
 
 
