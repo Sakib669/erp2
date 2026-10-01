@@ -23,7 +23,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 10  | Payroll Calculation Engine                  | Slice 6    | done    |
 | 11  | Double Entry General Ledger                 | Slice 7    | done    |
 | 12  | Inventory and Warehouse Management          | Slice 8    | done    |
-| 13  | Procurement and Supplier Management         | Slice 9    | planned |
+| 13  | Procurement and Supplier Management         | Slice 9    | done    |
 | 14  | Fixed Asset Management                      | Slice 10   | planned |
 | 15  | Enterprise Approval Workflows               | Slice 11   | planned |
 | 16  | Operations and Branch Services              | Slice 12   | planned |

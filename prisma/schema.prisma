@@ -30,6 +30,10 @@ model Company {
   itemCategories   ItemCategory[]
   items            Item[]
   stockMovements   StockMovement[]
+  suppliers        Supplier[]
+  purchaseOrders   PurchaseOrder[]
+  goodsReceiptNotes GoodsReceiptNote[]
+  supplierInvoices SupplierInvoice[]
 
   @@map("companies")
 }
@@ -64,6 +68,9 @@ model Branch {
   journalEntries     JournalEntry[]
   warehouses         Warehouse[]
   stockMovements     StockMovement[]
+  purchaseOrders     PurchaseOrder[]
+  goodsReceiptNotes  GoodsReceiptNote[]
+  supplierInvoices   SupplierInvoice[]
 
   @@index([companyId])
   @@map("branches")
@@ -109,6 +116,10 @@ model User {
   auditLogs      AuditLog[]
   employee       Employee?
   stockMovements StockMovement[]
+  createdPurchaseOrders  PurchaseOrder[]    @relation("POCreatedByUser")
+  approvedPurchaseOrders PurchaseOrder[]    @relation("POApprovedByUser")
+  receivedGoodsReceipts  GoodsReceiptNote[] @relation("GRNReceivedByUser")
+  createdSupplierInvoices SupplierInvoice[] @relation("InvoiceCreatedByUser")
 
   @@index([email])
   @@index([status])
@@ -795,6 +806,7 @@ model Warehouse {
   branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
   stockLevels    StockLevel[]
   stockMovements StockMovement[]
+  goodsReceiptNotes GoodsReceiptNote[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -837,8 +849,10 @@ model Item {
 
   company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   category       ItemCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  stockLevels    StockLevel[]
-  stockMovements StockMovement[]
+  stockLevels        StockLevel[]
+  stockMovements     StockMovement[]
+  purchaseOrderItems PurchaseOrderItem[]
+  goodsReceiptItems  GoodsReceiptItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -894,5 +908,191 @@ model StockMovement {
   @@map("stock_movements")
 }
 
+// -------------------------------------------------------------
+// Procurement & Supplier Management Models
+// -------------------------------------------------------------
 
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
 
+enum GoodsReceiptStatus {
+  COMPLETED
+  CANCELLED
+}
+
+enum SupplierInvoiceStatus {
+  PENDING_MATCH
+  MATCHED
+  DISCREPANCY
+  PAID
+  CANCELLED
+}
+
+model Supplier {
+  id               String    @id @default(cuid())
+  companyId        String
+  code             String
+  name             String
+  contactPerson    String?
+  email            String?
+  phone            String?
+  taxId            String?
+  paymentTermsDays Int       @default(30)
+  address          String?
+  isActive         Boolean   @default(true)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchaseOrders   PurchaseOrder[]
+  supplierInvoices SupplierInvoice[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id                   String              @id @default(cuid())
+  companyId            String
+  branchId             String
+  poNumber             String
+  supplierId           String
+  status               PurchaseOrderStatus @default(DRAFT)
+  orderDate            DateTime            @default(now())
+  expectedDeliveryDate DateTime?
+  totalAmount          Int                 @default(0) // cents
+  taxAmount            Int                 @default(0) // cents
+  notes                String?
+  createdByUserId      String
+  approvedByUserId     String?
+  approvedAt           DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch            Branch              @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplier          Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  createdByUser     User                @relation("POCreatedByUser", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  approvedByUser    User?               @relation("POApprovedByUser", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  items             PurchaseOrderItem[]
+  goodsReceiptNotes GoodsReceiptNote[]
+  supplierInvoices  SupplierInvoice[]
+
+  @@unique([companyId, poNumber])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([supplierId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id               String  @id @default(cuid())
+  purchaseOrderId  String
+  itemId           String
+  quantityOrdered  Int
+  quantityReceived Int     @default(0)
+  unitPrice        Int     // cents
+  lineTotal        Int     // cents
+  notes            String?
+
+  purchaseOrder     PurchaseOrder      @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  item              Item               @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  goodsReceiptItems GoodsReceiptItem[]
+
+  @@index([purchaseOrderId])
+  @@index([itemId])
+  @@map("purchase_order_items")
+}
+
+model GoodsReceiptNote {
+  id               String             @id @default(cuid())
+  companyId        String
+  branchId         String
+  grnNumber        String
+  purchaseOrderId  String
+  warehouseId      String
+  receiptDate      DateTime           @default(now())
+  status           GoodsReceiptStatus @default(COMPLETED)
+  notes            String?
+  receivedByUserId String
+  createdAt        DateTime           @default(now())
+
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch           Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  purchaseOrder    PurchaseOrder      @relation(fields: [purchaseOrderId], references: [id], onDelete: Restrict)
+  warehouse        Warehouse          @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  receivedByUser   User               @relation("GRNReceivedByUser", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  items            GoodsReceiptItem[]
+  supplierInvoices SupplierInvoice[]
+
+  @@unique([companyId, grnNumber])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([purchaseOrderId])
+  @@index([warehouseId])
+  @@map("goods_receipt_notes")
+}
+
+model GoodsReceiptItem {
+  id                  String  @id @default(cuid())
+  goodsReceiptNoteId  String
+  purchaseOrderItemId String
+  itemId              String
+  quantityReceived    Int
+  unitCost            Int     // cents
+  notes               String?
+
+  goodsReceiptNote  GoodsReceiptNote  @relation(fields: [goodsReceiptNoteId], references: [id], onDelete: Cascade)
+  purchaseOrderItem PurchaseOrderItem @relation(fields: [purchaseOrderItemId], references: [id], onDelete: Restrict)
+  item              Item              @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([goodsReceiptNoteId])
+  @@index([purchaseOrderItemId])
+  @@index([itemId])
+  @@map("goods_receipt_items")
+}
+
+model SupplierInvoice {
+  id                 String                @id @default(cuid())
+  companyId          String
+  branchId           String
+  invoiceNumber      String
+  supplierId         String
+  purchaseOrderId    String
+  goodsReceiptNoteId String?
+  invoiceDate        DateTime              @default(now())
+  dueDate            DateTime?
+  totalAmount        Int                   // cents
+  status             SupplierInvoiceStatus @default(PENDING_MATCH)
+  paymentTerms       String?
+  notes              String?
+  createdByUserId    String
+  deletedAt          DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch           Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplier         Supplier          @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  purchaseOrder    PurchaseOrder     @relation(fields: [purchaseOrderId], references: [id], onDelete: Restrict)
+  goodsReceiptNote GoodsReceiptNote? @relation(fields: [goodsReceiptNoteId], references: [id], onDelete: SetNull)
+  createdByUser    User              @relation("InvoiceCreatedByUser", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([companyId, supplierId, invoiceNumber])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([supplierId])
+  @@index([purchaseOrderId])
+  @@index([status])
+  @@map("supplier_invoices")
+}

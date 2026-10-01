@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 
 export async function cleanDatabase() {
+  await prisma.supplierInvoice.deleteMany();
+  await prisma.goodsReceiptItem.deleteMany();
+  await prisma.goodsReceiptNote.deleteMany();
+  await prisma.purchaseOrderItem.deleteMany();
+  await prisma.purchaseOrder.deleteMany();
+  await prisma.supplier.deleteMany();
   await prisma.stockMovement.deleteMany();
   await prisma.stockLevel.deleteMany();
   await prisma.item.deleteMany();
