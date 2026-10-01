@@ -24,7 +24,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 11  | Double Entry General Ledger                 | Slice 7    | done    |
 | 12  | Inventory and Warehouse Management          | Slice 8    | done    |
 | 13  | Procurement and Supplier Management         | Slice 9    | done    |
-| 14  | Fixed Asset Management                      | Slice 10   | planned |
+| 14  | Fixed Asset Management                      | Slice 10   | done    |
 | 15  | Enterprise Approval Workflows               | Slice 11   | planned |
 | 16  | Operations and Branch Services              | Slice 12   | planned |
 | 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned |
@@ -254,12 +254,14 @@ Manage vendors, purchase orders, goods received notes, and supplier invoice gene
 
 ## Slice 10: Fixed Asset Management
 
-### 14. Fixed Asset Management · needs a decision
+### 14. Fixed Asset Management ? done
 
 Register company assets, track branch assignments, and calculate periodic depreciation schedules.
 **Done when:** assets track depreciation calculations, ledger reflects asset write downs, and disposals record gain or loss.
 
-- [ ] Design it (spec): /architect fixed asset management
+- [x] Design it (spec): /architect fixed asset management
+- [x] Build it: /develop fixed asset management
+- [x] Verify it: /check verify
 
 ## Slice 11: Enterprise Approval Workflows
 
