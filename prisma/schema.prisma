@@ -23,6 +23,9 @@ model Company {
   leaveTypes       LeaveType[]
   salaryComponents SalaryComponent[]
   payrollRuns      PayrollRun[]
+  accounts         Account[]
+  fiscalPeriods    FiscalPeriod[]
+  journalEntries   JournalEntry[]
 
   @@map("companies")
 }
@@ -54,6 +57,7 @@ model Branch {
   leaveRequests      LeaveRequest[]
   payrollRuns        PayrollRun[]
   payslips           Payslip[]
+  journalEntries     JournalEntry[]
 
   @@index([companyId])
   @@map("branches")
@@ -638,6 +642,118 @@ model PayslipItem {
   @@index([payslipId])
   @@index([salaryComponentId])
   @@map("payslip_items")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  CANCELLED
+}
+
+enum JournalLineType {
+  DEBIT
+  CREDIT
+}
+
+model Account {
+  id           String      @id @default(cuid())
+  companyId    String
+  code         String
+  name         String
+  type         AccountType
+  currency     String      @default("USD")
+  balance      Int         @default(0) // cents
+  description  String?
+  isReconciled Boolean     @default(false)
+  parentId     String?
+  deletedAt    DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parent       Account?      @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children     Account[]     @relation("AccountHierarchy")
+  journalLines JournalLine[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@index([type])
+  @@index([parentId])
+  @@map("accounts")
+}
+
+model FiscalPeriod {
+  id             String    @id @default(cuid())
+  companyId      String
+  name           String
+  startDate      DateTime
+  endDate        DateTime
+  isClosed       Boolean   @default(false)
+  closedAt       DateTime?
+  closedByUserId String?
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([startDate, endDate])
+  @@map("fiscal_periods")
+}
+
+model JournalEntry {
+  id             String        @id @default(cuid())
+  companyId      String
+  branchId       String
+  entryNumber    String
+  entryDate      DateTime
+  status         JournalStatus @default(DRAFT)
+  description    String
+  reference      String?
+  totalAmount    Int           @default(0) // cents
+  postedAt       DateTime?
+  postedByUserId String?
+  deletedAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch  Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  lines   JournalLine[]
+
+  @@unique([companyId, entryNumber])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([entryDate])
+  @@index([status])
+  @@map("journal_entries")
+}
+
+model JournalLine {
+  id             String          @id @default(cuid())
+  journalEntryId String
+  accountId      String
+  type           JournalLineType
+  amount         Int             // cents, strictly > 0
+  memo           String?
+  createdAt      DateTime        @default(now())
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account      Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([journalEntryId])
+  @@index([accountId])
+  @@map("journal_lines")
 }
 
 

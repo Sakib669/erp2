@@ -21,7 +21,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done    |
 | 9   | Leave Management Engine                     | Slice 5    | done    |
 | 10  | Payroll Calculation Engine                  | Slice 6    | done    |
-| 11  | Double Entry General Ledger                 | Slice 7    | planned |
+| 11  | Double Entry General Ledger                 | Slice 7    | done    |
 | 12  | Inventory and Warehouse Management          | Slice 8    | planned |
 | 13  | Procurement and Supplier Management         | Slice 9    | planned |
 | 14  | Fixed Asset Management                      | Slice 10   | planned |
@@ -205,12 +205,23 @@ Define salary structures, components, and process monthly payroll runs in backgr
 
 ## Slice 7: Double Entry General Ledger
 
-### 11. Double Entry General Ledger · needs a decision
+### 11. Double Entry General Ledger · complete (spec 0010)
 
 Manage chart of accounts, journal vouchers, and ledger postings with balanced debit credit validation and accounting period locks.
 **Done when:** unbalanced vouchers are rejected, posted journals update account balances, and backdated vouchers in locked periods are rejected.
 
-- [ ] Design it (spec): /architect double entry general ledger
+- [x] Design it (spec): /architect double entry general ledger
+- [x] Build it: /develop double entry general ledger
+  - [x] Prisma schema additions for Account, FiscalPeriod, JournalEntry, and JournalLine
+  - [x] Account Zod validation schemas for chart of accounts, fiscal periods, and journal entries
+  - [x] Server actions for Account and Fiscal Period CRUD with closed period protection
+  - [x] Balanced debit credit validation engine in createJournalEntryAction
+  - [x] Ledger posting action postJournalEntryAction updating real time account balances
+  - [x] Chart of accounts manager view at /accounts
+  - [x] Journal vouchers ledger view at /accounts/journals and fiscal periods view at /accounts/periods
+- [x] Verify it: /check verify double entry general ledger
+- [x] Test it: /test double entry general ledger
+      Spec 0010 · code in `src/`
 
 ## Slice 8: Inventory and Warehouse Management
 

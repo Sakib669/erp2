@@ -81,6 +81,10 @@ describe("Feature 10: Payroll Calculation Engine Integration Tests", () => {
 
   beforeEach(async () => {
     // Teardown in foreign key order
+    await prisma.journalLine.deleteMany();
+    await prisma.journalEntry.deleteMany();
+    await prisma.fiscalPeriod.deleteMany();
+    await prisma.account.deleteMany();
     await prisma.payslipItem.deleteMany();
     await prisma.payslip.deleteMany();
     await prisma.payrollRun.deleteMany();
