@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterAll, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { cleanDatabase } from "./helpers/teardown";
 import { generateSync } from "otplib";
 import {
   createBranchAction,
@@ -79,20 +80,7 @@ describe("Feature 5: Identity, Auth & Branch Context Integration", () => {
 
   beforeEach(async () => {
     // Clean up test data in foreign key order
-    await prisma.attendanceRecord.deleteMany();
-    await prisma.rawAttendanceLog.deleteMany();
-    await prisma.employeeTransition.deleteMany();
-    await prisma.employee.deleteMany();
-    await prisma.shift.deleteMany();
-    await prisma.designation.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.setting.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.userBranch.deleteMany();
-    await prisma.userRole.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.branch.deleteMany();
-    await prisma.company.deleteMany();
+    await cleanDatabase();
 
     // Create test company
     const company = await prisma.company.create({
@@ -627,5 +615,9 @@ describe("Feature 5: Identity, Auth & Branch Context Integration", () => {
         resetUserTwoFactorAction(testUserId, "Unauthorized attempt")
       ).rejects.toThrow("FORBIDDEN: Only super administrators");
     });
+  });
+
+  afterAll(async () => {
+    await cleanDatabase();
   });
 });

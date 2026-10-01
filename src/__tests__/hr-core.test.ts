@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterAll, vi } from "vitest";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { cleanDatabase } from "./helpers/teardown";
 import {
   createDesignationAction,
   updateDesignationAction,
@@ -76,22 +77,7 @@ describe("Feature 7: HR Core and Employee Lifecycle Integration Tests", () => {
 
   beforeEach(async () => {
     // Clean tables in foreign key dependency order
-    await prisma.attendanceRecord.deleteMany();
-    await prisma.rawAttendanceLog.deleteMany();
-    await prisma.employeeTransition.deleteMany();
-    await prisma.employee.deleteMany();
-    await prisma.shift.deleteMany();
-    await prisma.designation.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.userRole.deleteMany();
-    await prisma.userBranch.deleteMany();
-    await prisma.rolePermission.deleteMany();
-    await prisma.role.deleteMany();
-    await prisma.permission.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.branch.deleteMany();
-    await prisma.company.deleteMany();
+    await cleanDatabase();
 
     // Create Base Company
     const company = await prisma.company.create({
@@ -687,5 +673,9 @@ describe("Feature 7: HR Core and Employee Lifecycle Integration Tests", () => {
       expect(profileRes.employee?.branch.name).toBe("New York Headquarters");
       expect(profileRes.employee?.transitions.length).toBeGreaterThanOrEqual(1);
     });
+  });
+
+  afterAll(async () => {
+    await cleanDatabase();
   });
 });

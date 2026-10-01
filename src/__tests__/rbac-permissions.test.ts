@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterAll, vi } from "vitest";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { cleanDatabase } from "./helpers/teardown";
 import { seedRbac, SYSTEM_PERMISSIONS } from "@/lib/rbac-seed";
 import {
   requirePermission,
@@ -78,23 +79,7 @@ describe("Feature 6: RBAC and Permission Enforcement Integration", () => {
 
   beforeEach(async () => {
     // Clean up test tables in foreign key order
-    await prisma.attendanceRecord.deleteMany();
-    await prisma.rawAttendanceLog.deleteMany();
-    await prisma.employeeTransition.deleteMany();
-    await prisma.employee.deleteMany();
-    await prisma.shift.deleteMany();
-    await prisma.designation.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.setting.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.userBranch.deleteMany();
-    await prisma.userRole.deleteMany();
-    await prisma.rolePermission.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
-    await prisma.permission.deleteMany();
-    await prisma.branch.deleteMany();
-    await prisma.company.deleteMany();
+    await cleanDatabase();
 
     // Seed permissions and system roles
     await seedRbac(prisma);
@@ -628,5 +613,9 @@ describe("Feature 6: RBAC and Permission Enforcement Integration", () => {
       expect(user?.userBranches[0].branchId).toBe(branchBId);
       expect(user?.activeBranchId).toBe(branchBId);
     });
+  });
+
+  afterAll(async () => {
+    await cleanDatabase();
   });
 });

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { cleanDatabase } from "./helpers/teardown";
 import { getBranchPrisma } from "@/lib/branch-prisma";
 import { withAuditTransaction } from "@/lib/audit";
 import {
@@ -16,20 +17,7 @@ describe("Core Multi Tenant Data Model & Isolation", () => {
 
   beforeEach(async () => {
     // Clean up test data
-    await prisma.attendanceRecord.deleteMany();
-    await prisma.rawAttendanceLog.deleteMany();
-    await prisma.employeeTransition.deleteMany();
-    await prisma.employee.deleteMany();
-    await prisma.shift.deleteMany();
-    await prisma.designation.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.setting.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.userBranch.deleteMany();
-    await prisma.userRole.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.branch.deleteMany();
-    await prisma.company.deleteMany();
+    await cleanDatabase();
 
     const company = await prisma.company.create({
       data: {
@@ -231,5 +219,9 @@ describe("Core Multi Tenant Data Model & Isolation", () => {
         { userId: testUser2Id, branchId: branchAId }
       )
     ).rejects.toThrow(ConcurrencyConflictError);
+  });
+
+  afterAll(async () => {
+    await cleanDatabase();
   });
 });

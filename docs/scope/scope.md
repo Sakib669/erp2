@@ -22,7 +22,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 9   | Leave Management Engine                     | Slice 5    | done    |
 | 10  | Payroll Calculation Engine                  | Slice 6    | done    |
 | 11  | Double Entry General Ledger                 | Slice 7    | done    |
-| 12  | Inventory and Warehouse Management          | Slice 8    | planned |
+| 12  | Inventory and Warehouse Management          | Slice 8    | done    |
 | 13  | Procurement and Supplier Management         | Slice 9    | planned |
 | 14  | Fixed Asset Management                      | Slice 10   | planned |
 | 15  | Enterprise Approval Workflows               | Slice 11   | planned |
@@ -225,12 +225,23 @@ Manage chart of accounts, journal vouchers, and ledger postings with balanced de
 
 ## Slice 8: Inventory and Warehouse Management
 
-### 12. Inventory and Warehouse Management · needs a decision
+### 12. Inventory and Warehouse Management · complete (spec 0011)
 
 Track items, branch warehouses, stock ledger movements with FIFO or average valuation, and optimistic concurrency versioning.
 **Done when:** stock movements update inventory with atomic row locks, version numbers prevent race conditions, and negative stock is rejected.
 
-- [ ] Design it (spec): /architect inventory and warehouse management
+- [x] Design it (spec): /architect inventory and warehouse management
+- [x] Build it: /develop inventory and warehouse management
+  - [x] Prisma schema additions for Warehouse, ItemCategory, Item, StockLevel, and StockMovement
+  - [x] Inventory Zod validation schemas for warehouses, categories, items, and movements
+  - [x] Server actions for Warehouse, Category, Item CRUD, and stock transactions
+  - [x] Atomic concurrency engine with version control and negative stock rejection
+  - [x] Inter warehouse atomic transfer action with dual ledger postings
+  - [x] Items catalog and stock levels view at /inventory
+  - [x] Warehouse locations view at /inventory/warehouses and movements ledger view at /inventory/movements
+- [x] Verify it: /check verify inventory and warehouse management
+- [x] Test it: /test inventory and warehouse management
+      Spec 0011 · code in `src/`
 
 ## Slice 9: Procurement and Supplier Management
 
