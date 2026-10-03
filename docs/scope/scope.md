@@ -9,26 +9,26 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 
 ## At a glance
 
-| #   | Feature                                     | Phase      | Status  |
-| --- | ------------------------------------------- | ---------- | ------- |
-| 1   | Stack and architecture                      | Foundation | done    |
-| 2   | Coding standards and tooling                | Foundation | done    |
-| 3   | Core multi tenant data model                | Foundation | done    |
-| 4   | Design system and UI foundation             | Foundation | done    |
-| 5   | Identity, Auth and Branch Context           | Slice 1    | done    |
-| 6   | RBAC and Permission Enforcement             | Slice 2    | done    |
-| 7   | HR Core and Employee Lifecycle              | Slice 3    | done    |
-| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done    |
-| 9   | Leave Management Engine                     | Slice 5    | done    |
-| 10  | Payroll Calculation Engine                  | Slice 6    | done    |
-| 11  | Double Entry General Ledger                 | Slice 7    | done    |
-| 12  | Inventory and Warehouse Management          | Slice 8    | done    |
-| 13  | Procurement and Supplier Management         | Slice 9    | done    |
-| 14  | Fixed Asset Management                      | Slice 10   | done    |
-| 15  | Enterprise Approval Workflows               | Slice 11   | done    |
-| 16  | Operations and Branch Services              | Slice 12   | done    |
-| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | done    |
-| 18  | Security Hardening and Automated Operations | Slice 14   | planned |
+| #   | Feature                                     | Phase      | Status |
+| --- | ------------------------------------------- | ---------- | ------ |
+| 1   | Stack and architecture                      | Foundation | done   |
+| 2   | Coding standards and tooling                | Foundation | done   |
+| 3   | Core multi tenant data model                | Foundation | done   |
+| 4   | Design system and UI foundation             | Foundation | done   |
+| 5   | Identity, Auth and Branch Context           | Slice 1    | done   |
+| 6   | RBAC and Permission Enforcement             | Slice 2    | done   |
+| 7   | HR Core and Employee Lifecycle              | Slice 3    | done   |
+| 8   | Biometric Attendance and Ingestion Queue    | Slice 4    | done   |
+| 9   | Leave Management Engine                     | Slice 5    | done   |
+| 10  | Payroll Calculation Engine                  | Slice 6    | done   |
+| 11  | Double Entry General Ledger                 | Slice 7    | done   |
+| 12  | Inventory and Warehouse Management          | Slice 8    | done   |
+| 13  | Procurement and Supplier Management         | Slice 9    | done   |
+| 14  | Fixed Asset Management                      | Slice 10   | done   |
+| 15  | Enterprise Approval Workflows               | Slice 11   | done   |
+| 16  | Operations and Branch Services              | Slice 12   | done   |
+| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | done   |
+| 18  | Security Hardening and Automated Operations | Slice 14   | done   |
 
 ## Foundations
 
@@ -303,7 +303,9 @@ Deliver real time executive metrics on profit and loss, payroll headcount, and s
 Configure rate limiting, strict Content Security Policy headers, and automated database backup routines.
 **Done when:** public endpoints enforce rate limits, browser requests pass security headers, and scheduled database backups execute reliably.
 
-- [ ] Design it (spec): /architect security hardening and automated operations
+- [x] Design it (spec): /architect security hardening and automated operations
+  - [x] Build it: /develop security hardening and automated operations
+  - [x] Verify it: /check verify
 
 ## Deferred
 

@@ -40,6 +40,7 @@ model Company {
   branchDocuments     BranchDocument[]
   visitorLogs         VisitorLog[]
   vehicleReservations VehicleReservation[]
+  databaseBackups     DatabaseBackup[]
 
   @@map("companies")
 }
@@ -1434,4 +1435,26 @@ model VehicleReservation {
   @@index([vehiclePlate])
   @@index([startTime, endTime])
   @@map("vehicle_reservations")
+}
+
+enum BackupStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model DatabaseBackup {
+  id        String       @id @default(cuid())
+  companyId String
+  fileName  String
+  fileSize  Int
+  status    BackupStatus @default(COMPLETED)
+  checksum  String
+  createdAt DateTime     @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("database_backups")
 }
