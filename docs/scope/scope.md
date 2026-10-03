@@ -25,7 +25,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 12  | Inventory and Warehouse Management          | Slice 8    | done    |
 | 13  | Procurement and Supplier Management         | Slice 9    | done    |
 | 14  | Fixed Asset Management                      | Slice 10   | done    |
-| 15  | Enterprise Approval Workflows               | Slice 11   | planned |
+| 15  | Enterprise Approval Workflows               | Slice 11   | done    |
 | 16  | Operations and Branch Services              | Slice 12   | planned |
 | 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned |
 | 18  | Security Hardening and Automated Operations | Slice 14   | planned |
@@ -270,7 +270,9 @@ Register company assets, track branch assignments, and calculate periodic deprec
 Configurable multi tier approval hierarchies with conditional rules and automatic delegation when designated approvers are on leave.
 **Done when:** approval requests route through configured approval chains, evaluate condition limits, and auto delegate absent approvers.
 
-- [ ] Design it (spec): /architect enterprise approval workflows
+- [x] Design it (spec): /architect enterprise approval workflows
+  - [x] Build it: /develop enterprise approval workflows
+  - [x] Verify it: /check verify
 
 ## Slice 12: Operations and Branch Services
 

@@ -34,6 +34,8 @@ model Company {
   purchaseOrders    PurchaseOrder[]
   goodsReceiptNotes GoodsReceiptNote[]
   supplierInvoices  SupplierInvoice[]
+  approvalWorkflows ApprovalWorkflow[]
+  approvalRequests  ApprovalRequest[]
 
   @@map("companies")
 }
@@ -71,6 +73,8 @@ model Branch {
   purchaseOrders    PurchaseOrder[]
   goodsReceiptNotes GoodsReceiptNote[]
   supplierInvoices  SupplierInvoice[]
+  approvalWorkflows ApprovalWorkflow[]
+  approvalRequests  ApprovalRequest[]
   fixedAssets       FixedAsset[]
 
   @@index([companyId])
@@ -117,10 +121,15 @@ model User {
   auditLogs               AuditLog[]
   employee                Employee?
   stockMovements          StockMovement[]
-  createdPurchaseOrders   PurchaseOrder[]    @relation("POCreatedByUser")
-  approvedPurchaseOrders  PurchaseOrder[]    @relation("POApprovedByUser")
-  receivedGoodsReceipts   GoodsReceiptNote[] @relation("GRNReceivedByUser")
-  createdSupplierInvoices SupplierInvoice[]  @relation("InvoiceCreatedByUser")
+  createdPurchaseOrders   PurchaseOrder[]      @relation("POCreatedByUser")
+  approvedPurchaseOrders  PurchaseOrder[]      @relation("POApprovedByUser")
+  receivedGoodsReceipts   GoodsReceiptNote[]   @relation("GRNReceivedByUser")
+  createdSupplierInvoices SupplierInvoice[]    @relation("InvoiceCreatedByUser")
+  approvalSteps           ApprovalStep[]       @relation("RequiredUser")
+  requestedApprovals      ApprovalRequest[]    @relation("RequestedApproval")
+  approvalActions         ApprovalAction[]     @relation("ApprovalActionActor")
+  delegationsGiven        ApprovalDelegation[] @relation("Delegator")
+  delegationsReceived     ApprovalDelegation[] @relation("Delegatee")
 
   @@index([email])
   @@index([status])
@@ -137,8 +146,9 @@ model Role {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  permissions RolePermission[]
-  userRoles   UserRole[]
+  permissions   RolePermission[]
+  approvalSteps ApprovalStep[]
+  userRoles     UserRole[]
 
   @@map("roles")
 }
@@ -152,7 +162,8 @@ model Permission {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  rolePermissions RolePermission[]
+  rolepermissions RolePermission[]
+  approvalSteps   ApprovalStep[]
 
   @@index([module])
   @@map("permissions")
@@ -988,6 +999,8 @@ model PurchaseOrder {
   items             PurchaseOrderItem[]
   goodsReceiptNotes GoodsReceiptNote[]
   supplierInvoices  SupplierInvoice[]
+  approvalWorkflows ApprovalWorkflow[]
+  approvalRequests  ApprovalRequest[]
 
   @@unique([companyId, poNumber])
   @@index([companyId])
@@ -1148,4 +1161,129 @@ model AssetDepreciation {
   @@index([assetId])
   @@index([journalEntryId])
   @@map("asset_depreciations")
+}
+
+enum EntityType {
+  PURCHASE_ORDER
+  LEAVE_REQUEST
+  SUPPLIER_INVOICE
+  PAYSLIP
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  CANCELLED
+}
+
+model ApprovalWorkflow {
+  id         String     @id @default(cuid())
+  companyId  String
+  branchId   String?
+  name       String
+  entityType EntityType
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  deletedAt  DateTime?
+
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch?           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  steps           ApprovalStep[]
+  requests        ApprovalRequest[]
+  purchaseOrder   PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@index([companyId])
+  @@index([branchId])
+  @@index([entityType])
+  @@map("approval_workflows")
+}
+
+model ApprovalStep {
+  id              String   @id @default(cuid())
+  workflowId      String
+  stepOrder       Int
+  requiredRoleId  String?
+  requiredUserId  String?
+  thresholdAmount Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workflow     ApprovalWorkflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  requiredRole Role?             @relation(fields: [requiredRoleId], references: [id])
+  requiredUser User?             @relation("RequiredUser", fields: [requiredUserId], references: [id])
+  requests     ApprovalRequest[]
+  actions      ApprovalAction[]
+  permission   Permission?       @relation(fields: [permissionId], references: [id])
+  permissionId String?
+
+  @@index([workflowId])
+  @@map("approval_steps")
+}
+
+model ApprovalRequest {
+  id                String         @id @default(cuid())
+  companyId         String
+  branchId          String
+  workflowId        String
+  entityType        EntityType
+  entityId          String
+  status            ApprovalStatus @default(PENDING)
+  currentStepId     String?
+  requestedByUserId String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  workflow        ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  currentStep     ApprovalStep?    @relation(fields: [currentStepId], references: [id])
+  requestedByUser User             @relation("RequestedApproval", fields: [requestedByUserId], references: [id])
+  actions         ApprovalAction[]
+  purchaseOrder   PurchaseOrder?   @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@index([companyId])
+  @@index([branchId])
+  @@index([entityType, entityId])
+  @@map("approval_requests")
+}
+
+model ApprovalAction {
+  id          String   @id @default(cuid())
+  requestId   String
+  stepId      String?
+  actorUserId String
+  action      String
+  comments    String?
+  createdAt   DateTime @default(now())
+
+  request   ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  step      ApprovalStep?   @relation(fields: [stepId], references: [id])
+  actorUser User            @relation("ApprovalActionActor", fields: [actorUserId], references: [id])
+
+  @@index([requestId])
+  @@index([actorUserId])
+  @@map("approval_actions")
+}
+
+model ApprovalDelegation {
+  id              String   @id @default(cuid())
+  delegatorUserId String
+  delegateeUserId String
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  delegatorUser User @relation("Delegator", fields: [delegatorUserId], references: [id])
+  delegateeUser User @relation("Delegatee", fields: [delegateeUserId], references: [id])
+
+  @@index([delegatorUserId])
+  @@index([delegateeUserId])
+  @@map("approval_delegations")
 }
