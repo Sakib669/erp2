@@ -26,7 +26,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 13  | Procurement and Supplier Management         | Slice 9    | done    |
 | 14  | Fixed Asset Management                      | Slice 10   | done    |
 | 15  | Enterprise Approval Workflows               | Slice 11   | done    |
-| 16  | Operations and Branch Services              | Slice 12   | planned |
+| 16  | Operations and Branch Services              | Slice 12   | done    |
 | 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned |
 | 18  | Security Hardening and Automated Operations | Slice 14   | planned |
 
@@ -281,7 +281,9 @@ Configurable multi tier approval hierarchies with conditional rules and automati
 Provide branch operational support including internal helpdesk tickets, document storage, visitor logs, and vehicle reservations.
 **Done when:** branch staff can file support tickets, upload categorized documents, log visitors, and schedule company vehicles.
 
-- [ ] Design it (spec): /architect operations and branch services
+- [x] Design it (spec): /architect operations and branch services
+  - [x] Build it: /develop operations and branch services
+  - [x] Verify it: /check verify
 
 ## Slice 13: Management Dashboard and Dynamic Reporting
 

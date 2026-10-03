@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 
 export async function cleanDatabase() {
+  await prisma.vehicleReservation.deleteMany();
+  await prisma.visitorLog.deleteMany();
+  await prisma.branchDocument.deleteMany();
+  await prisma.helpdeskTicket.deleteMany();
   await prisma.approvalDelegation.deleteMany();
   await prisma.approvalAction.deleteMany();
   await prisma.approvalRequest.deleteMany();

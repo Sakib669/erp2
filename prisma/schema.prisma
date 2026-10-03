@@ -17,25 +17,29 @@ model Company {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  branches          Branch[]
-  designations      Designation[]
-  employees         Employee[]
-  leaveTypes        LeaveType[]
-  salaryComponents  SalaryComponent[]
-  payrollRuns       PayrollRun[]
-  accounts          Account[]
-  fiscalPeriods     FiscalPeriod[]
-  journalEntries    JournalEntry[]
-  warehouses        Warehouse[]
-  itemCategories    ItemCategory[]
-  items             Item[]
-  stockMovements    StockMovement[]
-  suppliers         Supplier[]
-  purchaseOrders    PurchaseOrder[]
-  goodsReceiptNotes GoodsReceiptNote[]
-  supplierInvoices  SupplierInvoice[]
-  approvalWorkflows ApprovalWorkflow[]
-  approvalRequests  ApprovalRequest[]
+  branches            Branch[]
+  designations        Designation[]
+  employees           Employee[]
+  leaveTypes          LeaveType[]
+  salaryComponents    SalaryComponent[]
+  payrollRuns         PayrollRun[]
+  accounts            Account[]
+  fiscalPeriods       FiscalPeriod[]
+  journalEntries      JournalEntry[]
+  warehouses          Warehouse[]
+  itemCategories      ItemCategory[]
+  items               Item[]
+  stockMovements      StockMovement[]
+  suppliers           Supplier[]
+  purchaseOrders      PurchaseOrder[]
+  goodsReceiptNotes   GoodsReceiptNote[]
+  supplierInvoices    SupplierInvoice[]
+  approvalWorkflows   ApprovalWorkflow[]
+  approvalRequests    ApprovalRequest[]
+  helpdeskTickets     HelpdeskTicket[]
+  branchDocuments     BranchDocument[]
+  visitorLogs         VisitorLog[]
+  vehicleReservations VehicleReservation[]
 
   @@map("companies")
 }
@@ -54,28 +58,32 @@ model Branch {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  company           Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  userBranches      UserBranch[]
-  userRoles         UserRole[]
-  auditLogs         AuditLog[]
-  settings          Setting[]
-  departments       Department[]
-  shifts            Shift[]
-  employees         Employee[]
-  rawAttendanceLogs RawAttendanceLog[]
-  attendanceRecords AttendanceRecord[]
-  leaveRequests     LeaveRequest[]
-  payrollRuns       PayrollRun[]
-  payslips          Payslip[]
-  journalEntries    JournalEntry[]
-  warehouses        Warehouse[]
-  stockMovements    StockMovement[]
-  purchaseOrders    PurchaseOrder[]
-  goodsReceiptNotes GoodsReceiptNote[]
-  supplierInvoices  SupplierInvoice[]
-  approvalWorkflows ApprovalWorkflow[]
-  approvalRequests  ApprovalRequest[]
-  fixedAssets       FixedAsset[]
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  userBranches        UserBranch[]
+  userRoles           UserRole[]
+  auditLogs           AuditLog[]
+  settings            Setting[]
+  departments         Department[]
+  shifts              Shift[]
+  employees           Employee[]
+  rawAttendanceLogs   RawAttendanceLog[]
+  attendanceRecords   AttendanceRecord[]
+  leaveRequests       LeaveRequest[]
+  payrollRuns         PayrollRun[]
+  payslips            Payslip[]
+  journalEntries      JournalEntry[]
+  warehouses          Warehouse[]
+  stockMovements      StockMovement[]
+  purchaseOrders      PurchaseOrder[]
+  goodsReceiptNotes   GoodsReceiptNote[]
+  supplierInvoices    SupplierInvoice[]
+  approvalWorkflows   ApprovalWorkflow[]
+  approvalRequests    ApprovalRequest[]
+  helpdeskTickets     HelpdeskTicket[]
+  branchDocuments     BranchDocument[]
+  visitorLogs         VisitorLog[]
+  vehicleReservations VehicleReservation[]
+  fixedAssets         FixedAsset[]
 
   @@index([companyId])
   @@map("branches")
@@ -130,6 +138,10 @@ model User {
   approvalActions         ApprovalAction[]     @relation("ApprovalActionActor")
   delegationsGiven        ApprovalDelegation[] @relation("Delegator")
   delegationsReceived     ApprovalDelegation[] @relation("Delegatee")
+  createdTickets          HelpdeskTicket[]     @relation("TicketCreatedByUser")
+  assignedTickets         HelpdeskTicket[]     @relation("TicketAssignedToUser")
+  uploadedDocuments       BranchDocument[]     @relation("DocumentUploadedByUser")
+  vehicleReservations     VehicleReservation[] @relation("VehicleReservedByUser")
 
   @@index([email])
   @@index([status])
@@ -358,6 +370,7 @@ model Employee {
   leaveBalances     LeaveBalance[]
   leaveRequests     LeaveRequest[]
   payslips          Payslip[]
+  hostedVisitors    VisitorLog[]         @relation("VisitorHostEmployee")
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -991,16 +1004,20 @@ model PurchaseOrder {
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 
-  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  branch            Branch              @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  supplier          Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
-  createdByUser     User                @relation("POCreatedByUser", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  approvedByUser    User?               @relation("POApprovedByUser", fields: [approvedByUserId], references: [id], onDelete: SetNull)
-  items             PurchaseOrderItem[]
-  goodsReceiptNotes GoodsReceiptNote[]
-  supplierInvoices  SupplierInvoice[]
-  approvalWorkflows ApprovalWorkflow[]
-  approvalRequests  ApprovalRequest[]
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch              Branch               @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplier            Supplier             @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  createdByUser       User                 @relation("POCreatedByUser", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  approvedByUser      User?                @relation("POApprovedByUser", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  items               PurchaseOrderItem[]
+  goodsReceiptNotes   GoodsReceiptNote[]
+  supplierInvoices    SupplierInvoice[]
+  approvalWorkflows   ApprovalWorkflow[]
+  approvalRequests    ApprovalRequest[]
+  helpdeskTickets     HelpdeskTicket[]
+  branchDocuments     BranchDocument[]
+  visitorLogs         VisitorLog[]
+  vehicleReservations VehicleReservation[]
 
   @@unique([companyId, poNumber])
   @@index([companyId])
@@ -1286,4 +1303,135 @@ model ApprovalDelegation {
   @@index([delegatorUserId])
   @@index([delegateeUserId])
   @@map("approval_delegations")
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model HelpdeskTicket {
+  id               String         @id @default(cuid())
+  companyId        String
+  branchId         String
+  ticketNumber     String
+  title            String
+  description      String
+  category         String
+  priority         TicketPriority @default(MEDIUM)
+  status           TicketStatus   @default(OPEN)
+  createdByUserId  String
+  assignedToUserId String?
+  resolvedAt       DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdByUser   User           @relation("TicketCreatedByUser", fields: [createdByUserId], references: [id])
+  assignedToUser  User?          @relation("TicketAssignedToUser", fields: [assignedToUserId], references: [id])
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@unique([companyId, ticketNumber])
+  @@index([companyId])
+  @@index([branchId])
+  @@index([status])
+  @@map("helpdesk_tickets")
+}
+
+model BranchDocument {
+  id               String    @id @default(cuid())
+  companyId        String
+  branchId         String
+  title            String
+  category         String
+  fileUrl          String
+  fileType         String
+  fileSize         Int
+  uploadedByUserId String
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  uploadedByUser  User           @relation("DocumentUploadedByUser", fields: [uploadedByUserId], references: [id])
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@index([companyId])
+  @@index([branchId])
+  @@index([category])
+  @@map("branch_documents")
+}
+
+model VisitorLog {
+  id             String    @id @default(cuid())
+  companyId      String
+  branchId       String
+  visitorName    String
+  phone          String?
+  hostEmployeeId String
+  purpose        String
+  badgeNumber    String?
+  checkInTime    DateTime  @default(now())
+  checkOutTime   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  hostEmployee    Employee       @relation("VisitorHostEmployee", fields: [hostEmployeeId], references: [id])
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@index([companyId])
+  @@index([branchId])
+  @@index([checkInTime])
+  @@map("visitor_logs")
+}
+
+enum VehicleReservationStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model VehicleReservation {
+  id               String                   @id @default(cuid())
+  companyId        String
+  branchId         String
+  vehiclePlate     String
+  vehicleModel     String
+  reservedByUserId String
+  startTime        DateTime
+  endTime          DateTime
+  purpose          String
+  status           VehicleReservationStatus @default(CONFIRMED)
+  deletedAt        DateTime?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  reservedByUser  User           @relation("VehicleReservedByUser", fields: [reservedByUserId], references: [id])
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String?
+
+  @@index([companyId])
+  @@index([branchId])
+  @@index([vehiclePlate])
+  @@index([startTime, endTime])
+  @@map("vehicle_reservations")
 }

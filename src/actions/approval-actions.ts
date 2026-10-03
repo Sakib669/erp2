@@ -11,7 +11,7 @@ import {
   createApprovalDelegationSchema,
 } from "@/lib/validations/approvals";
 import { z } from "zod";
-import { ApprovalStatus, EntityType } from "@prisma/client";
+import { EntityType } from "@prisma/client";
 
 export async function createApprovalWorkflowAction(
   rawInput: z.input<typeof createApprovalWorkflowSchema>
