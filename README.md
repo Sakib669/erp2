@@ -20,17 +20,17 @@ The platform follows a tracer bullet architecture, implementing every module ver
 
 ## Technology Stack
 
-| Layer              | Technology                | Details                                                       |
-| ------------------ | ------------------------- | ------------------------------------------------------------- |
-| Framework          | Next.js 15                | App Router, React 19, Server Actions, Turbopack               |
-| Language & Runtime | TypeScript 5, Node.js 24  | Strict type checking without emit errors                      |
-| Database           | PostgreSQL 16             | Relational persistence with foreign keys and compound indexes |
-| ORM                | Prisma ORM 5              | Schema migrations, typed queries, and transactional clients   |
-| Authentication     | Auth.js (NextAuth v5)     | Credentials provider, JWT sessions, and TOTP pairing          |
-| Styling & UI       | Tailwind CSS 3, shadcn ui | Accessible OKLCH color palettes and Radix UI primitives       |
-| Icons              | Lucide React              | Clean, consistent enterprise icon set                         |
-| Testing            | Vitest                    | 17 test suites covering 170 unit and integration tests        |
-| Package Manager    | pnpm                      | Fast, deterministic dependency management                     |
+| Layer              | Technology                 | Details                                                       |
+| ------------------ | -------------------------- | ------------------------------------------------------------- |
+| Framework          | Next.js 15                 | App Router, React 19.3, Server Actions, Turbopack             |
+| Language & Runtime | TypeScript 5.9, Node.js 24 | Strict type checking, Node types 26 without emit errors       |
+| Database           | PostgreSQL 16              | Relational persistence with foreign keys and compound indexes |
+| ORM                | Prisma ORM 6 (v6.19)       | Schema migrations, typed queries, and transactional clients   |
+| Authentication     | Auth.js (NextAuth v5 beta) | Credentials provider, JWT sessions, and TOTP pairing          |
+| Styling & UI       | Tailwind CSS 4, shadcn ui  | Accessible OKLCH color palettes and Radix UI primitives       |
+| Icons              | Lucide React (v1.51)       | Clean, consistent enterprise icon set                         |
+| Testing            | Vitest (v5.0.3)            | 17 test suites covering 170 unit and integration tests        |
+| Package Manager    | pnpm                       | Fast, deterministic dependency management                     |
 
 ---
 
