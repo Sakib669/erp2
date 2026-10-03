@@ -27,7 +27,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 14  | Fixed Asset Management                      | Slice 10   | done    |
 | 15  | Enterprise Approval Workflows               | Slice 11   | done    |
 | 16  | Operations and Branch Services              | Slice 12   | done    |
-| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | planned |
+| 17  | Management Dashboard and Dynamic Reporting  | Slice 13   | done    |
 | 18  | Security Hardening and Automated Operations | Slice 14   | planned |
 
 ## Foundations
@@ -292,7 +292,9 @@ Provide branch operational support including internal helpdesk tickets, document
 Deliver real time executive metrics on profit and loss, payroll headcount, and stock valuation with custom report generation.
 **Done when:** dashboards display cross branch performance indicators and users can filter and export custom tabular reports.
 
-- [ ] Design it (spec): /architect management dashboard and dynamic reporting
+- [x] Design it (spec): /architect management dashboard and dynamic reporting
+  - [x] Build it: /develop management dashboard and dynamic reporting
+  - [x] Verify it: /check verify
 
 ## Slice 14: Security Hardening and Automated Operations
 
