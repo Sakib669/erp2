@@ -1,6 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { requireAuth } from "@/lib/auth-helpers";
-import { cookies } from "next/headers";
+import { requireAuth, getActiveBranchId } from "@/lib/auth-helpers";
 import { OperationsDashboard } from "@/components/operations/operations-dashboard";
 
 export const metadata = {
@@ -9,12 +8,7 @@ export const metadata = {
 
 export default async function OperationsPage() {
   await requireAuth();
-  const cookieStore = await cookies();
-  const activeBranchId = cookieStore.get("branchId")?.value;
-
-  if (!activeBranchId) {
-    return null;
-  }
+  const activeBranchId = await getActiveBranchId();
 
   return (
     <AppShell currentBranchId={activeBranchId}>

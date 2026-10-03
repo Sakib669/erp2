@@ -1,0 +1,7 @@
+{
+  "tool": "vitest",
+  "additionalTools": ["@testing-library/react"],
+  "testDir": "src/__tests__",
+  "filePattern": "*.test.ts",
+  "packageManager": "pnpm"
+}

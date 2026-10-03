@@ -208,5 +208,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
-  secret: process.env.AUTH_SECRET,
+  logger: {
+    error(error) {
+      const errName = error instanceof Error ? error.name : "";
+      const errType = (error as { type?: string })?.type;
+      const errMsg = error instanceof Error ? error.message : String(error);
+      const isJwtSessionError =
+        errName === "JWTSessionError" ||
+        errType === "JWTSessionError" ||
+        errMsg.includes("JWTSessionError") ||
+        errMsg.includes("no matching decryption secret") ||
+        errMsg.includes("decryption secret");
+
+      if (isJwtSessionError) {
+        return;
+      }
+      console.error(error);
+    },
+  },
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    "dev-insecure-secret-key-must-be-changed-in-production-min-32-chars",
 });

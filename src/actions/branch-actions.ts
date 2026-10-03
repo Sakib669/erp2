@@ -50,8 +50,14 @@ export async function setActiveBranchAction(branchId: string) {
     });
   }
 
-  // Set active_branch_id cookie
+  // Set active_branch_id and branchId cookies
   cookieStore.set("active_branch_id", branchId, {
+    path: "/",
+    sameSite: "lax",
+    httpOnly: false,
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+  cookieStore.set("branchId", branchId, {
     path: "/",
     sameSite: "lax",
     httpOnly: false,

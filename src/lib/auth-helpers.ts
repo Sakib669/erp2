@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
 
 export async function getCurrentUser() {
-  const session = await auth();
-  return session?.user ?? null;
+  try {
+    const session = await auth();
+    return session?.user ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function requireAuth() {
@@ -139,4 +143,32 @@ export async function requireBranchAccess(branchId: string) {
   }
 
   return user;
+}
+
+export async function getActiveBranchId(): Promise<string> {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const cookieBranchId =
+    cookieStore.get("active_branch_id")?.value ||
+    cookieStore.get("branchId")?.value;
+
+  if (cookieBranchId) {
+    return cookieBranchId;
+  }
+
+  const user = await getCurrentUser();
+  if (user?.activeBranchId) {
+    return user.activeBranchId;
+  }
+  if (user?.branches?.[0]?.id) {
+    return user.branches[0].id;
+  }
+
+  const defaultBranch = await prisma.branch.findFirst({
+    where: { deletedAt: null },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+
+  return defaultBranch?.id || "na-hq";
 }

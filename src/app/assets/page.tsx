@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/layout/app-shell";
-import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
+import {
+  getCurrentUser,
+  requirePermission,
+  getActiveBranchId,
+} from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Monitor, ArrowRight } from "lucide-react";
 import {
@@ -22,18 +26,7 @@ export default async function AssetsPage() {
   if (!user) return null;
   await requirePermission("ASSET_VIEW");
 
-  const cookieStore = await cookies();
-  const activeBranchId = cookieStore.get("branchId")?.value;
-
-  if (!activeBranchId) {
-    return (
-      <AppShell currentBranchId="">
-        <div className="p-8">
-          <p>Please select a branch to view assets.</p>
-        </div>
-      </AppShell>
-    );
-  }
+  const activeBranchId = await getActiveBranchId();
 
   const branch = await prisma.branch.findUnique({
     where: { id: activeBranchId },
