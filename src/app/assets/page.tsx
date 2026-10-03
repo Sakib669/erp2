@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { AppShell } from "@/components/layout/app-shell";
 import {
   getCurrentUser,

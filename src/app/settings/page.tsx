@@ -12,7 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Sliders, User, Lock } from "lucide-react";
+import { ShieldCheck, Sliders, User } from "lucide-react";
 
 export const metadata = {
   title: "Settings & Audit | ERP",
